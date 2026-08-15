@@ -3,7 +3,7 @@ title: 3-엔진 계정·권한 관리 표준
 category: db운영
 tags: [dba, security, access-control, mysql, postgresql, sqlserver]
 summary: MySQL/PostgreSQL/SQL Server 공통 계정 설계 원칙 — Role/로그인 분리, 배포자 Role, 모니터링 전용 계정, break-glass, 엔진별 금지 권한.
-sources: ["Notion: DB 운영 쿼리 인덱스 하위 권한 문서들 (2026-07-30)", "사용자 제공 PostgreSQL 운영 메모 (2026-08-15)", "PostgreSQL 공식 문서: Password Authentication·Schemas (2026-08-15 대조)"]
+sources: ["Notion: DB 운영 쿼리 인덱스 하위 권한 문서들 (2026-07-30)", "사용자 제공 PostgreSQL 운영 메모 (2026-08-15)", "사용자 제공 PostgreSQL 오브젝트 메모 (2026-08-16)", "PostgreSQL 공식 문서: Password Authentication·Schemas·System Information Functions (2026-08-16 대조)"]
 status: draft
 base_confidence: 0.78
 provenance:
@@ -11,7 +11,7 @@ provenance:
   inferred: 0.06
   ambiguous: 0.02
 created: 2026-08-04
-updated: 2026-08-15
+updated: 2026-08-16
 notion_page_id: "3bdfb969-b8be-819f-b4bb-e96ce60dd69a"
 notion_synced: "2026-08-15T22:55:00+0900"
 ---
@@ -34,6 +34,7 @@ notion_synced: "2026-08-15T22:55:00+0900"
 ## 엔진별
 
 - **PG**: `ALTER DEFAULT PRIVILEGES`(객체 생성 Role을 `FOR ROLE`로 명시), public 스키마 CREATE 회수, extensions 전용 스키마, SECURITY DEFINER는 고정 `search_path`. 원격 인증은 최소 CIDR의 `hostssl` + SCRAM을 기본으로 하며 MD5·`trust`를 호환성 우회로 허용하지 않는다. 삭제 절차: REASSIGN OWNED → DROP OWNED → DROP USER. 세부 오픈 게이트는 [[postgresql-operations]].
+- PG DDL 배포는 로그인 주체인 `session_user`와 권한 검사·소유권 주체인 `current_user`를 구분한다. [[postgresql-object-operations]]의 `SET ROLE <owner>` 패턴과 생성 후 owner 검증을 권한 자동화에 포함한다.
 - **MySQL**: SUPER/FILE/SHUTDOWN/WITH GRANT OPTION 금지. DROP은 작업 단위 임시 부여. 인증 해시 추출·재사용 금지(신규 발급 원칙).
 - **SQL Server**: 고정 롤(db_owner/db_ddladmin) 대신 사용자 정의 Role + 명시적 GRANT.
 

@@ -2,8 +2,8 @@
 title: PostgreSQL 운영 지식 — 계정·파라미터·설계·모니터링
 category: db운영
 tags: [dba, postgresql, monitoring, architecture, vacuum]
-summary: 접속·SCRAM 인증, 계정/권한·스키마 표준, 확장 모듈, 파라미터 베이스라인, 인덱스/파티션, XID wraparound와 알람 기준을 다룬 PostgreSQL 운영 런북.
-sources: ["Notion: PostgreSQL 지식 인덱스 트리 (2026-07-30)", "도서 노트: PostgreSQL DBA를 위한 Admin 이야기", "사용자 제공 PostgreSQL 운영 메모 (2026-08-15)", "PostgreSQL 공식 문서: Password Authentication·Schemas·Predefined Roles (2026-08-15 대조)"]
+summary: 접속·SCRAM 인증, 계정/권한·스키마 표준, 확장 모듈, 파라미터, 오브젝트 운영, XID wraparound와 알람 기준을 다룬 PostgreSQL 운영 런북.
+sources: ["Notion: PostgreSQL 지식 인덱스 트리 (2026-07-30)", "도서 노트: PostgreSQL DBA를 위한 Admin 이야기", "사용자 제공 PostgreSQL 운영 메모 (2026-08-15)", "사용자 제공 PostgreSQL 오브젝트 메모 (2026-08-16)", "PostgreSQL 공식 문서: Password Authentication·Schemas·Predefined Roles·CREATE TABLE·CREATE VIEW·CREATE INDEX (2026-08-16 대조)"]
 status: draft
 base_confidence: 0.78
 provenance:
@@ -11,7 +11,7 @@ provenance:
   inferred: 0.10
   ambiguous: 0.02
 created: 2026-08-04
-updated: 2026-08-15
+updated: 2026-08-16
 notion_page_id: "3bdfb969-b8be-8115-9fd5-f522b3c532a8"
 notion_synced: "2026-08-15T22:55:00+0900"
 ---
@@ -108,10 +108,11 @@ ORDER BY extname;
 
 ## 오브젝트·테이블 설계
 
+- 테이블 소유자는 스키마 소유자가 아니라 DDL의 `current_user`다. 배포자는 `session_user`와 `current_user`를 확인하고 `SET ROLE <owner>`로 생성 주체를 고정한다. 상세 런북은 [[postgresql-object-operations]].
 - 운영 인덱스 작업은 **무조건 CONCURRENTLY**. 실패 시 INVALID 잔존 → `pg_index.indisvalid` 확인 후 재생성.
 - 파티션: 부모는 CIC 미지원 → `CREATE INDEX ON ONLY 부모` → 자식별 CIC → `ATTACH PARTITION`. ATTACH 전 CHECK 제약 선생성으로 풀스캔 회피. DETACH CONCURRENTLY(14+).
 - VACUUM FULL 운영 금지(Access Exclusive) → pg_repack.
-- `char(n)` 금지(text 기본, bpchar 형변환으로 인덱스 미사용). IDENTITY > serial. PK `bigint GENERATED ALWAYS AS IDENTITY` + 외부 노출용은 별도 uuid. 금액 `numeric`, 시각 `timestamptz`.
+- `char(n)`은 공백 패딩·비교 의미 혼란 때문에 금지(text 기본). “bpchar 형변환 때문에 인덱스 미사용”이라는 일괄 설명은 부정확하다. IDENTITY > serial. PK `bigint GENERATED ALWAYS AS IDENTITY` + 외부 노출용은 별도 uuid. 금액 `numeric`, 시각 `timestamptz`.
 - **FK 컬럼 인덱스는 자동 생성되지 않음 → 직접 생성.** 복합 인덱스는 동등→범위→정렬 순. HOT Update + fillfactor 80.
 - DDL은 트랜잭션 롤백 가능(예외: CREATE DATABASE/TABLESPACE, CIC 등).
 - Unlogged 테이블: WAL 미발생, 크래시 시 전체 소실 — ETL/임시 용도만.
@@ -155,6 +156,7 @@ ORDER BY extname;
 - [[monitoring-incident-runbook]] — wraparound 경보 대응 절차
 - [[aurora-dsql]] — PG 호환이지만 VACUUM·파라미터 개념이 없는 분산 변종
 - [[worklog-kakaogames-2026]] — forum DB search_path 적용 업무 기록
+- [[postgresql-object-operations]] — 소유권·타입·DDL·인덱스·파티션·뷰·시퀀스 상세 런북
 
 ## Sources
 

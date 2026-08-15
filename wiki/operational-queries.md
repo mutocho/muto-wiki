@@ -2,11 +2,11 @@
 title: 운영 쿼리 모음 — 진단·권한·DDL/DML (MySQL·PostgreSQL·SQL Server)
 tags: [dba, snippet, monitoring, troubleshooting, mysql, postgresql, sqlserver]
 summary: 3사 엔진 쿼리 모음 — 진단(1~11)·권한 감사(12)는 읽기 전용, 권한 부여(13)·DDL(14)·DML(15)은 안전 절차 포함 변경 명령. 실행 검증 전이므로 버전·조합 확인 필수.
-sources: [표준 시스템 뷰·카탈로그 기반 자체 작성 (2026-08-04)]
+sources: [표준 시스템 뷰·카탈로그 기반 자체 작성 (2026-08-04), "사용자 제공 PostgreSQL 오브젝트 메모 및 PostgreSQL 공식 DDL 문서 대조 (2026-08-16)"]
 category: db운영
 status: draft
 created: 2026-08-04
-updated: 2026-08-04
+updated: 2026-08-16
 notion_page_id: "3bdfb969-b8be-81a6-b74a-f9e3ec136313"
 notion_synced: "2026-08-15T19:48:09+0900"
 ---
@@ -851,7 +851,7 @@ ALTER TABLE app.orders
 ALTER TABLE app.orders VALIDATE CONSTRAINT chk_status;   -- 약한 락으로 검증만
 ```
 
-파티션 인덱스 — 부모는 `CONCURRENTLY`를 지원하지 않으므로 자식별로 만들어 붙인다 ([[postgresql-operations]]):
+파티션 인덱스 — 부모는 `CONCURRENTLY`를 지원하지 않으므로 자식별로 만들어 붙인다 ([[postgresql-object-operations]]):
 
 ```sql
 -- 1) 부모에 INVALID 인덱스 생성 (자식이 모두 붙으면 자동 valid)
@@ -880,7 +880,7 @@ ALTER TABLE app.events
 ALTER TABLE app.events DETACH PARTITION app.events_2025_08 CONCURRENTLY;  -- 14+
 ```
 
-> PG의 DDL은 대부분 **트랜잭션 롤백이 가능**하다. 예외: `CREATE INDEX CONCURRENTLY`, `CREATE DATABASE`, `CREATE TABLESPACE`, `ALTER SYSTEM`.
+> PG의 DDL은 대부분 **트랜잭션 롤백이 가능**하다. 대표적인 트랜잭션 블록 실행 불가 명령은 `CREATE/DROP DATABASE`, `CREATE/DROP TABLESPACE`, `CREATE INDEX CONCURRENTLY`, `REINDEX CONCURRENTLY`, `VACUUM`, `ALTER SYSTEM`이다. 소유권·복사·뷰·시퀀스까지 포함한 판단표는 [[postgresql-object-operations]].
 > 재구성은 `VACUUM FULL`(ACCESS EXCLUSIVE)이 아니라 `pg_repack`을 쓴다.
 
 **MySQL**
