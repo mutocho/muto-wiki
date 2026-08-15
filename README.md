@@ -25,8 +25,8 @@ cd /Users/muto/branch/muto-wiki
 claude          # 또는 codex
 ```
 
-Claude Code는 **열 때 자동으로 최신을 내려받고, 작업을 마치면 올린다.**
-Codex는 훅이 없으므로 `CLAUDE.md` 규칙에 따라 직접 실행한다 (아래 [git 동기화](#git-동기화) 참조).
+Claude Code와 Codex 모두 **열 때 자동으로 최신을 내려받고, 작업을 마치면 올린다.**
+각각 `.claude/settings.json`과 `.codex/hooks.json`에 훅이 걸려 있다 (아래 [git 동기화](#git-동기화) 참조).
 
 ### 읽고 탐색할 때 — Obsidian
 
@@ -157,6 +157,8 @@ muto-wiki/
 ├── CLAUDE.md          에이전트 규칙 (스키마)
 ├── AGENTS.md          → CLAUDE.md 심볼릭 링크 (Codex·기타 에이전트용)
 ├── scripts/sync.sh    git 동기화
+├── .claude/           Claude Code 훅 (settings.json)
+├── .codex/            Codex 훅 (hooks.json)
 ├── raw/               원본 자료 — 내가 넣고, 에이전트는 읽기만
 │   └── archive/       위키 반영이 끝난 원본
 └── wiki/              정리된 지식 — 에이전트가 작성·관리
@@ -224,7 +226,8 @@ Takeaway는 **내용 요약이 아니라 행동 지침**이다. "그래서 내�
 | 환경 | 동작 |
 |---|---|
 | **Claude Code** | `.claude/settings.json` 훅이 자동 실행. 손댈 것 없음 |
-| **Codex 등** | 직접 실행 — 시작 전 `pull`, 위키를 고친 뒤 `push` |
+| **Codex** | `.codex/hooks.json` 훅이 자동 실행. 손댈 것 없음 |
+| **그 외** | 직접 실행 — 시작 전 `pull`, 위키를 고친 뒤 `push` |
 
 ```bash
 bash scripts/sync.sh pull    # 세션 시작 시
