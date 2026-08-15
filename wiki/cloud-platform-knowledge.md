@@ -6,9 +6,9 @@ summary: Aurora 스토리지 내부 구조와 운영 특성, SQL Server→Azure 
 sources: ["Notion: 클라우드 및 플랫폼 트리 (2026-07-30)", "AWS 세미나 노트 2022~2023 (보관 대상)"]
 status: draft
 created: 2026-08-04
-updated: 2026-08-12
+updated: 2026-08-15
 notion_page_id: "3bdfb969-b8be-81bd-b165-c9eedaa93e87"
-notion_synced: "2026-08-15T19:15:41+0900"
+notion_synced: "2026-08-15T22:55:00+0900"
 ---
 
 > [!tip] 핵심 Takeaway
