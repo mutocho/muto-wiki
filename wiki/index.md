@@ -14,23 +14,24 @@ notion_synced: null
 > [!tip] 핵심 Takeaway
 > - **여기가 모든 탐색의 출발점이다.** 질문에 답할 때도, 자료를 넣을 때도 먼저 이 목차에서 관련 페이지를 찾는다 — 새 페이지를 만들기 전에 흡수할 곳이 있는지 확인하는 것이 원칙
 > - **폴더는 없다. 분류는 이 파일에만 존재한다.** 분류를 바꾸고 싶으면 파일을 옮기지 말고 이 목차를 고친다
-> - 현재 **31개 페이지 / 깨진 링크 0 / 고아 페이지 0**
+> - 현재 **32개 페이지 / 깨진 링크 0 / 고아 페이지 0**
 
 # Wiki Index
 
-*총 31개 페이지. 마지막 갱신: 2026-08-15*
+*총 32개 페이지. 마지막 갱신: 2026-08-15*
 
 전체 운영 규칙은 저장소 루트의 `CLAUDE.md`. 작업 이력은 [[log]].
 
 ---
 
-## DB 운영 지식 (20)
+## DB 운영 지식 (21)
 
 재사용 가능한 기술 지식. 회사 맥락을 최소화해 이직 후에도 쓸 수 있는 형태로 유지한다.
 
 ### 엔진별 운영
 
-- [[mysql-operations]] — 백업 표준, Undo·장기 트랜잭션, 락, 버전 이정표. **회수 릴리스와 8.0.42 회귀가 업그레이드 하드 필터** ( #mysql #aurora #backup)
+- [[mysql-operations]] — 백업 도구 분기, Undo·장기 트랜잭션, 락, 버전 이정표. **회수 릴리스와 8.0.42 회귀가 업그레이드 하드 필터** ( #mysql #aurora #backup)
+- [[mysql-dump-load]] — mysqldump/MySQL Shell 논리 백업·이관 레퍼런스. **관리형 DB 대상 옵션 5종은 고정값, `--databases` 누락이 오적재 1순위.** 실기 검증 전 ( #mysql #backup #migration)
 - [[postgresql-operations]] — 계정·파라미터 베이스라인, CONCURRENTLY 원칙, XID wraparound 단계별 알람 ( #postgresql #vacuum #monitoring)
 - [[sqlserver-xevent-sessions]] — XEvent 세션 3종 정의. **데드락은 `system_health`가 이미 잡으므로 만들지 않고, 블로킹은 없으므로 필수.** 825는 severity 10이라 번호로 열거 ( #sqlserver #xevent #monitoring)
 - [[sqlserver-backup-procedure]] — `SP_DB_BACKUP` 결함 5건 수정본. **정리 조건에 DB 식별자가 없어 타 DB 백업을 지우던 것을 3중 한정으로 교정.** 실행 검증 전 ( #sqlserver #backup #retention)
@@ -108,6 +109,7 @@ notion_synced: null
 
 - **[[notion-remediation-backlog]] P1 6건** — 실 서비스 스키마명이 박힌 TRUNCATE 생성기, QA RDS 실호스트명, 개인 이메일 노출. 미착수
 - **[[operational-queries]] 실행 검증** — 개발/QA 인스턴스 확인 후 현장 쿼리로 교체
+- **[[mysql-dump-load]] 증분 복구 배타 조건** — `dumpBinlogs`의 `since`는 `compatibility` 사용 덤프를 거부하는데, RDS/Aurora 대상은 `strip_definers`가 필수다. 관리형 DB에서 논리 덤프 기반 시점 복구가 성립하는지 미확인
 - **[[notion-llm-wiki-governance]] 역할 분담** — Notion 포털 vs 로컬 위키. 정하지 않으면 이중 관리가 계속된다
 - **[[db-security-review-patterns]] 재검증 주기** — "마지막 검증일 + N개월" 규칙 부재
 - **[[sqlserver-operations]] 2016 잔존 인스턴스** — 연장 지원 2026-07-15 종료

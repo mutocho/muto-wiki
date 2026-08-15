@@ -44,4 +44,5 @@ notion_synced: "2026-08-15T18:53:45+0900"
 - [[postgresql-operations]] — PG 롤 설계와 계정 삭제 절차 상세
 - [[mysql-operations]] · [[sqlserver-operations]] — 엔진별 권한 운영 맥락
 - [[sqlserver-backup-procedure]] — `xp_cmdshell`을 켜지 않고 백업을 수행하도록 고친 사례. 운영 프로시저에 어디까지 권한을 요구할지의 판단 기준
+- [[mysql-dump-load]] — 덤프·로드 전용 계정 권한 목록. `WITH GRANT OPTION` 보유 계정이 이관 후 남는 것이 여기 break-glass 원칙의 대표 위반 경로
 - [[dev-tooling-standards]] — 자격증명을 env로 주입하는 개발 쪽 원칙

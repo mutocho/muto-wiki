@@ -61,3 +61,4 @@ notion_synced: "2026-08-15T18:57:08+0900"
 - [[notion-llm-wiki-governance|LLM Wiki 운영 거버넌스]]
 - [[cloud-platform-knowledge]] — 2022~23 세미나 수치를 `보관` 등급으로 둔 이유
 - [[vault-governance-decisions]] — 상태 승격을 자동화하지 않기로 한 거버넌스 결정
+- [[mysql-dump-load]] — 사내 가이드 출처. 옵션 조합이 실기 검증 전이라 `draft` 유지 중인 사례

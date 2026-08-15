@@ -103,6 +103,7 @@ Community 비동기 Replica 승격은 GTID·relay log와 미적용 트랜잭션 
 - [[mysql-operations|MySQL/Aurora MySQL 운영 지식]]
 - [[cloud-platform-knowledge|클라우드·플랫폼 지식]]
 - [[monitoring-incident-runbook|모니터링·장애 대응 런북]]
+- [[mysql-dump-load]] — 공유 스토리지 구조 때문에 Reader 덤프가 락 제약을 받는다는 추정의 근거 페이지
 
 ## Sources
 
