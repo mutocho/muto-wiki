@@ -20,6 +20,7 @@ notion_synced: null
 
 ## 2026-08
 
+- [2026-08-15T20:05:00+09:00] UPDATE page="CLAUDE.md" note="§6.4 실행 비용 규칙 신설 — 최초 동기화 실측 기반. ① JSON 한글 이스케이프 금지(2.24배 팽창) ② 표준 파라미터 형식 고정(8회 실패·97KB·8턴 손실) ③ 같은 부모 페이지 배열 묶기(31콜→12콜) ④ 대형 페이지는 insert_content 분할. 변환기·스탬프를 scripts/notion-convert.py·notion-stamp.py로 저장소 이관(세션 스크래치패드는 소실됨). §1 구조 트리 반영"
 - [2026-08-15T19:50:00+09:00] SYNC_NOTION pages=31 skipped=2 target="DBA (3aefb969b8be801280b8dc2ff35fbefb)" note="최초 전량 동기화. 카테고리 5 + db운영 엔진 4 + 엔진공통 소분류 5 + kakaogames 구조 생성. index/log는 §6 규칙으로 제외. 전 페이지 notion_page_id·notion_synced 기록 완료 — 다음 실행부터 증분 판정 동작. 기존 '기술 문서' 하위 3개는 위키 미러가 아니라 원본 자료로 판단해 병합하지 않음(§6.2 확인 필요 대상)"
 - [2026-08-15T18:55:00+09:00] FIX note="blocked process threshold 1초→5초로 통일. sqlserver-operations(sp_configure 블록·Takeaway·Open Questions), sqlserver-xevent-sessions(경고→근거 note, 원래 값 1초 보존), operational-queries, index.md 미완 과제 제거. ^[ambiguous] 2곳 해소"
 - [2026-08-15T18:40:00+09:00] UPDATE page="sqlserver-xevent-sessions" note="신규 — XEvent 세션 3종(slow query·blocked process·error reported) 정의 + 데드락 미생성 근거. MS Learn으로 system_health 수집 범위 대조: 데드락 포함/blocked_process_report 미포함/error는 sev>=20만 확인. blocked process threshold 1초(구축표준) vs 5초(이 페이지) 불일치를 ^[ambiguous]로 기록. 역링크 5개 연결. index 30→31, db운영 19→20"
