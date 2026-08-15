@@ -10,7 +10,7 @@ status: draft
 created: 2026-08-04
 updated: 2026-08-15
 notion_page_id: "3bdfb969-b8be-8188-ac85-c84964c845d7"
-notion_synced: "2026-08-15T19:42:05+0900"
+notion_synced: "2026-08-15T23:20:00+0900"
 ---
 
 > [!tip] 핵심 Takeaway
@@ -141,7 +141,7 @@ DB명·경로·백업 타입(F/L/D)·보관일수·압축 여부를 받아 백�
    `sp_dropdevice @name, 'DELFILE'` — **디바이스와 실제 파일을 함께 삭제**
 6. `xp_cmdshell` 비활성화
 
-> [!warning] 현 상태로 자동 스케줄에 걸지 말 것 — 결함 4건
+> [!warning] 현 상태로 자동 스케줄에 걸지 말 것 — 결함 5건
 >
 > 1. **보관 정책이 DB별이 아니라 확장자 기준 전역이다.** 5단계의 조건이
 >    `날짜 < 기준일 AND phyname LIKE '%.bak'` 뿐이고 **`@DB_NAME` 필터가 없다.**
@@ -155,6 +155,9 @@ DB명·경로·백업 타입(F/L/D)·보관일수·압축 여부를 받아 백�
 >    확장자 필터가 먼저 평가된다는 보장이 없다 → 정리 단계가 조용히 실패한다 ^[inferred]
 > 4. **오류를 `SELECT`으로만 반환한다.** Agent Job에서 호출하면 성공으로 끝나
 >    **백업 실패가 알람되지 않는다.** → `THROW` 또는 `RAISERROR`로 승격 필요
+> 5. **`CHECKSUM`이 압축 옵션에 묶여 있다.** `WITH ... [,COMPRESSION, CHECKSUM]`이 한 덩어리라
+>    **비압축 백업은 체크섬 검증까지 함께 꺼진다.** 손상 감지를 압축 여부가 결정하게 된다
+>    → `CHECKSUM`은 항상, `COMPRESSION`만 조건부로 분리
 >
 > 원문 주석에도 모순이 있다 — 파라미터 정의는 `@MAINTENANCE_DAY`를 "보관 기간(일)"이라 하고
 > 하단 호출 예제는 "유지 주기(시간)"이라 한다. `DATEADD(DAY, ...)`를 쓰므로 **일이 맞다.**^[ambiguous]
