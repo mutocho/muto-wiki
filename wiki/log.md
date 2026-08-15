@@ -20,6 +20,7 @@ notion_synced: null
 
 ## 2026-08
 
+- [2026-08-15T16:48:00+09:00] QUERY query="DSQL에 대해 정리해줘" result_pages=1 note="기존 [[aurora-dsql]]로 답변. 신규 정보 없어 페이지 변경 없음"
 - [2026-08-15] MIGRATE source="llm-wiki/second-brain" pages=29 raw_archived=19 note="플랫 구조로 이전. 폴더 계층(dba/career/personal/references/synthesis) 제거하고 `category` 프론트매터로 분류 전환. 전 페이지 프론트매터 신 스키마 변환 + Takeaway callout 신규 작성. wikilink 경로 접두어 전면 제거. `_hub.md` 2개·`ROUTING.md`·`hot.md` 폐지(index.md와 CLAUDE.md가 대체)"
 - [2026-08-15] FIX note="교차참조 보강 — 비어버린 Related 절 12개 작성, 역방향 링크 34건 추가. 결과: 깨진 링크 0 / 고아 페이지 0 / 단방향 링크 0"
 - [2026-08-15] UPDATE page="vault-governance-decisions" note="구조 변경 반영 — 플랫 적재, CLAUDE.md 실체 + AGENTS.md 심볼릭 링크로 단일 소스 반전, 충돌 원격 우선 결정 추가. 이전 결정은 '변경 이력'에 보존"
