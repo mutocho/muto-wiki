@@ -20,6 +20,7 @@ notion_synced: null
 
 ## 2026-08
 
+- [2026-08-15T21:05:00+09:00] QUERY query="SQL Server 설정값" result_pages=3 note="sqlserver-operations(sp_configure·Trace flag·TempDB·Collation), sqlserver-xevent-sessions(blocked process threshold 전제), operational-queries. 새 지식 없어 페이지 갱신 없음"
 - [2026-08-15T20:45:00+09:00] SYNC_NOTION pages=31 note="교차참조 전환 — 위키링크를 <mention-page/>로 변경. scripts/notion-convert.py가 notion_page_id 맵을 참조해 링크를 직접 내도록 수정(2차 패스 영구 불필요). 이미 올라간 31개는 content_updates로 일회성 치환(슬러그형+표시명형 양쪽 투입, 미매칭 쌍은 무시됨). 전 페이지 회귀 테스트 235개 mention 생성/잔존 wikilink 0. CLAUDE.md §6.4 교차참조 항목 갱신"
 - [2026-08-15T20:44:00+09:00] FIX page="dbgw-queries(Notion)" note="'옮길'이 '옷길'로 잘못 올라간 것 정정. \\uXXXX 이스케이프를 손으로 타이핑하다 생긴 전사 오류 — §6.4 ①(원시 UTF-8 사용)의 추가 근거. 다른 페이지에도 같은 유형 오타가 있을 수 있어 확인 필요"
 - [2026-08-15T20:20:00+09:00] FIX page="CLAUDE.md" note="§6.4 ④ 정정 — '수십 KB면 분할'은 잘못된 귀인이었다. 실측 결과 실패는 크기가 아니라 형식 때문(동일 페이지가 18,430 bytes 실패 / 18,259자 성공, 5,076 bytes도 실패). operational-queries는 35,861자로 시험 없이 4청크 분할한 것이 순손실. '분할은 예측이 아니라 실패 후에'로 규칙 변경 + 크기는 바이트가 아닌 문자 수로 판단 명시"
