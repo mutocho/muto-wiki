@@ -14,17 +14,17 @@ notion_synced: null
 > [!tip] 핵심 Takeaway
 > - **여기가 모든 탐색의 출발점이다.** 질문에 답할 때도, 자료를 넣을 때도 먼저 이 목차에서 관련 페이지를 찾는다 — 새 페이지를 만들기 전에 흡수할 곳이 있는지 확인하는 것이 원칙
 > - **폴더는 없다. 분류는 이 파일에만 존재한다.** 분류를 바꾸고 싶으면 파일을 옮기지 말고 이 목차를 고친다
-> - 현재 **30개 페이지 / 깨진 링크 0 / 고아 페이지 0**
+> - 현재 **31개 페이지 / 깨진 링크 0 / 고아 페이지 0**
 
 # Wiki Index
 
-*총 30개 페이지. 마지막 갱신: 2026-08-15*
+*총 31개 페이지. 마지막 갱신: 2026-08-15*
 
 전체 운영 규칙은 저장소 루트의 `CLAUDE.md`. 작업 이력은 [[log]].
 
 ---
 
-## DB 운영 지식 (19)
+## DB 운영 지식 (20)
 
 재사용 가능한 기술 지식. 회사 맥락을 최소화해 이직 후에도 쓸 수 있는 형태로 유지한다.
 
@@ -32,6 +32,7 @@ notion_synced: null
 
 - [[mysql-operations]] — 백업 표준, Undo·장기 트랜잭션, 락, 버전 이정표. **회수 릴리스와 8.0.42 회귀가 업그레이드 하드 필터** ( #mysql #aurora #backup)
 - [[postgresql-operations]] — 계정·파라미터 베이스라인, CONCURRENTLY 원칙, XID wraparound 단계별 알람 ( #postgresql #vacuum #monitoring)
+- [[sqlserver-xevent-sessions]] — XEvent 세션 3종 정의. **데드락은 `system_health`가 이미 잡으므로 만들지 않고, 블로킹은 없으므로 필수.** 825는 severity 10이라 번호로 열거 ( #sqlserver #xevent #monitoring)
 - [[sqlserver-backup-procedure]] — `SP_DB_BACKUP` 결함 5건 수정본. **정리 조건에 DB 식별자가 없어 타 DB 백업을 지우던 것을 3중 한정으로 교정.** 실행 검증 전 ( #sqlserver #backup #retention)
 - [[sqlserver-operations]] — **신규 인스턴스 구축 표준**(Collation·TempDB·sp_configure·Trace flag), 에러로그 순환 Job, 백업 프로시저와 결함 5건, VLF, Parameter Sniffing, AG vs FCI ( #sqlserver #provisioning #backup #ha)
 - [[db-common-concepts]] — 3사 저장 단위·격리수준·MVCC·문법 비교표 + SQL 안티패턴 체크리스트 ( #comparison #sql)
@@ -111,7 +112,8 @@ notion_synced: null
 - **[[db-security-review-patterns]] 재검증 주기** — "마지막 검증일 + N개월" 규칙 부재
 - **[[sqlserver-operations]] 2016 잔존 인스턴스** — 연장 지원 2026-07-15 종료
 - **[[sqlserver-backup-procedure]] 실행 검증** — 결함 5건 수정본 작성 완료, 개발/QA 미검증. **정리 단계 삭제 대상을 `SELECT`으로 확인한 뒤 운영 적용**. 원본은 그때까지 자동 스케줄 금지
-- **[[sqlserver-operations]] XEvent 세션 표준** — 수집 대상 4종만 있고 필터·타깃·보관 정책 미정
+- **[[sqlserver-xevent-sessions]] 임계값·알람** — 3초/5초는 실측 근거 없음. 수집만 하고 알람 연동이 없어 [[monitoring-incident-runbook]]과 끊겨 있다
+- **`blocked process threshold` 불일치** — [[sqlserver-operations]] 구축 표준 1초 vs [[sqlserver-xevent-sessions]] 5초. 결정 필요
 - **[[sqlserver-operations]] Collation 적정성** — `Latin1_General_CI_AS_KS`가 한글 정렬에 맞는지 미확인
 - **[[dev-automation-detail]] Slack scope 축소** — 12개 중 3개 실사용 근거 미확인, 토큰 회전 절차 부재
 - **[[aurora-dsql]] 미확인 3건** — Firecracker 1:1, buffer pool 부재, v2 PG18. 세미나 발언만 존재

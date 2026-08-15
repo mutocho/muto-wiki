@@ -102,7 +102,7 @@ EXEC sp_configure 'remote admin connections', 1;        -- DAC 원격 접속
 | 플래그 | 용도 | 상태 |
 |---|---|---|
 | 1204 | 데드락을 에러로그에 기록 | 사용 |
-| 1222 | 데드락을 XML 형식으로 기록 | 사용 |
+| 1222 | 데드락을 XML 형식으로 기록 | 사용 — 단 `system_health`가 이미 deadlock graph를 잡는다 → [[sqlserver-xevent-sessions]] |
 | 3226 | **백업 성공** 메시지를 에러로그에 남기지 않음 | 사용 — 로그 노이즈 제거 |
 | ~~845~~ | Lock pages in memory 활성화 | **불필요** — 2012부터 기본 활성 |
 | ~~1118~~ | 혼합 익스텐트 대신 단일 익스텐트 할당 강제 | **불필요** — 2016부터 DB 옵션 `MIXED_PAGE_ALLOCATION`으로 제어하며 기본값 OFF(항상 단일 익스텐트) |
@@ -188,10 +188,11 @@ DB명·경로·백업 타입(F/L/D)·보관일수·압축 여부를 받아 백�
 
 ## Open Questions
 
-- **XEvent 세션 표준이 비어 있다.** 원본 메모에는 수집 대상 4종(slow query, blocked process,
-  deadlock, error log)만 있고 **필터 조건·타깃·보관 정책·파일 크기 상한이 없다.**
-  `blocked process`는 `sp_configure 'blocked process threshold (s)' = 1`이 전제이므로
-  구축 표준과 짝을 이룬다 — 세션 정의를 확보해 [[operational-queries]]와 함께 채울 것.
+- **`blocked process threshold` 값이 두 문서에서 다르다.** 이 페이지의 구축 표준은 **1초**,
+  [[sqlserver-xevent-sessions]]는 보고서 폭증을 이유로 **5초**를 제시한다. 어느 쪽을 표준으로
+  삼을지 결정이 필요하다.^[ambiguous] 1초를 유지하면 XEvent 파일 크기를 함께 키워야 한다.
+- **데드락이 최대 3중으로 기록된다.** 여기 Trace flag 1204/1222(에러로그) + `system_health`(기본
+  제공, deadlock graph 포함) + 선택적 전용 XEvent 세션. 1204/1222를 유지할지 정리 대상이다.^[inferred]
 - **Collation `Latin1_General_CI_AS_KS`가 한글 데이터에 적정한지 미확인.**
   `NVARCHAR`면 저장은 무관하나 **정렬·비교는 Latin1_General 규칙**을 따른다.
   `KS`(kana sensitive)는 일본어 가나 구분 옵션이라 한글과 직접 관계가 없다.
