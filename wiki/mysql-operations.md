@@ -2,11 +2,11 @@
 title: MySQL/Aurora MySQL 운영 지식
 category: db운영
 tags: [dba, mysql, aurora, backup, troubleshooting, version]
-summary: mysqldump/MySQL Shell 백업 표준, Undo·장기 트랜잭션, 락, 임시테이블 5.7→8.0, 버전별 이정표(회수 릴리스 포함), 모니터링 판단 기준.
+summary: mysqldump/MySQL Shell 백업 도구 분기 기준(실행 상세는 mysql-dump-load), Undo·장기 트랜잭션, 락, 임시테이블 5.7→8.0, 버전별 이정표(회수 릴리스 포함), 모니터링 판단 기준.
 sources: ["Notion: MySQL 지식 인덱스 트리 (2026-07-30)", MySQL 8.0/8.4 공식 릴리스 노트]
 status: draft
 created: 2026-08-04
-updated: 2026-08-04
+updated: 2026-08-15
 notion_page_id: "3bdfb969-b8be-817b-afeb-e275a155aa5f"
 notion_synced: "2026-08-15T18:53:45+0900"
 ---
@@ -14,7 +14,8 @@ notion_synced: "2026-08-15T18:53:45+0900"
 > [!tip] 핵심 Takeaway
 > - **버전 선정 자동화의 하드 필터 3종**: 회수 릴리스 `8.0.29`(instant column 결함), `8.0.38`/`8.4.1`(8001+ 테이블 재시작 실패)은 후보에서 무조건 제외. `8.0.42`는 파티션 pruning 회귀 → [[mysql-partition-pruning-prepared-stmt-bug]]
 > - **백업 검증은 성공 로그가 아니라 별도 환경 복원 테스트다.** 객체 수·행 수 대조까지가 한 단위 — 주간 점검 에이전트의 1순위 항목
-> - **규모별 백업 도구 분기 기준이 정해져 있다**: 수 GB 이하 mysqldump / 수십 GB+ MySQL Shell / 초대형+짧은 RTO는 물리백업. 이 판단은 자동화 가능하다
+> - **규모별 백업 도구 분기 기준이 정해져 있다**: 수 GB 이하 mysqldump / 수십 GB+ MySQL Shell / 초대형+짧은 RTO는 물리백업. 이 판단은 자동화 가능하다 — 실행 옵션은 [[mysql-dump-load]]
+> - **관리형 DB(RDS/Aurora) 대상 논리 덤프는 옵션 5종이 고정값이다** (`--set-gtid-purged=OFF`, `--no-tablespaces`, `strip_definers`, `strip_restricted_grants`, 타깃 `local_infile=1`). 이관 자동화에 박아두면 권한 관련 실패가 사전에 사라진다
 > - **단일 임계값으로 알람을 걸지 않는다.** 기준선·지속시간·변화율로 판단하고, 실제 부하 지표는 `Threads_running`이다
 > - `--single-transaction` 중 DDL이 돌면 일관성이 깨진다 — 백업 창과 배포 창을 겹치지 않게 하는 것이 운영 규칙
 > - `mysql_native_password` 폐기 경로(8.0.34 deprecated → 8.4 기본 비활성 → 9.0 제거)는 업그레이드 사전 점검 항목
@@ -29,6 +30,10 @@ notion_synced: "2026-08-15T18:53:45+0900"
 - 대용량은 MySQL Shell `util.dumpInstance/dumpSchemas/loadDump` (threads, zstd, dryRun, 재개 지원). RDS/Aurora 복원 시 `users:false`/`loadUsers:false` 기본.
 - 판단 기준: 수 GB 이하 mysqldump / 수십 GB+ Shell / 초대형+짧은 RTO는 물리백업(xtrabackup)·DMS.
 - 검증은 성공 로그가 아니라 파일·객체 수·행 수·별도 환경 복원 테스트로 한다.
+
+> 옵션 전체 목록, 관리형 DB(RDS/Aurora) 고정 옵션 세트, S3 직접 덤프, binlog 증분, 로드 후
+> 대조 체크리스트는 [[mysql-dump-load]]에 분리해 두었다. 위 판단 기준으로 도구를 고른 뒤
+> 실제 명령은 그쪽을 쓴다 — **`--databases` 누락과 `--add-drop-*`가 오적재 사고 1순위**다.
 
 ## Undo·장기 트랜잭션
 
@@ -69,6 +74,7 @@ MEMORY(고정길이, BLOB/TEXT 즉시 디스크 MyISAM) → TempTable(가변길�
 
 ## Related
 
+- [[mysql-dump-load]] — 위 백업 표준의 실행 레퍼런스. 옵션·이관·증분·에러 대응
 - [[mysql-partition-pruning-prepared-stmt-bug]] — 8.0.42 회귀 상세. 업그레이드 판단의 핵심 근거
 - [[aurora-vs-mysql-replication-architecture]] — Community 복제와 Aurora Reader의 구조 차이
 - [[db-common-concepts]] — 3사 비교 관점에서의 InnoDB 위치

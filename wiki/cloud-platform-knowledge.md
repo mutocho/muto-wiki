@@ -63,3 +63,4 @@ notion_synced: "2026-08-15T19:15:41+0900"
 - [[aurora-dsql]] — 같은 Aurora 이름을 쓰지만 운영 모델이 전혀 다른 분산 변종
 - [[monitoring-incident-runbook]] — 여기 정리된 Aurora 특성이 실제 장애 절차에서 쓰이는 곳
 - [[sqlserver-operations]] — Azure Blob 백업 절차를 실행하는 엔진 쪽 맥락
+- [[mysql-dump-load]] — 여기 정리한 Aurora 스토리지 특성이 Reader 덤프 제약·S3 직접 덤프로 나타나는 지점

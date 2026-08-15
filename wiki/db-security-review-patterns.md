@@ -70,3 +70,4 @@ notion_synced: "2026-08-15T19:18:14+0900"
 - [[dev-tooling-standards]] — 코드·CI 쪽 자격증명 관리 기준
 - [[operational-queries]] — 변경 명령(13~15)이 이 검토의 대상
 - [[sqlserver-operations]] — 인덱스 리빌드·Database Mail 위험의 엔진 맥락
+- [[mysql-dump-load]] — MySQL 쪽의 같은 유형. `--add-drop-*`와 `--databases` 누락이 파괴적 단계가 일상 절차에 섞인 사례
