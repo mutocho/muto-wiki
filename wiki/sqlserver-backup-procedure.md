@@ -251,3 +251,5 @@ GO
   삭제 조건 식별자 누락, 보안 설정 토글, `SELECT` 오류 반환
 - [[operational-queries]] — 13~15의 변경 명령과 같은 등급. **개발/QA 검증 후 운영 승격**
 - [[db-access-control]] — `xp_cmdshell`·sysadmin 권한을 어디까지 허용할지의 기준
+- [[sqlserver-xevent-sessions]] — 같은 구축 표준으로 함께 배포되는 진단 세션. 백업과 달리 파괴적 단계가 없어 검증 부담이 낮다
+- [[verbal-source-verification-policy]] — 사내 프로시저 출처라 결함 5건 수정본도 실행 검증 전까지 `draft`인 근거
