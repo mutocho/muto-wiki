@@ -6,7 +6,7 @@ summary: muto-wiki 전체 목차. 페이지가 추가·변경될 때마다 갱�
 sources: [wiki/*.md 프론트매터]
 status: reviewed
 created: 2026-08-15
-updated: 2026-08-15
+updated: 2026-08-16
 notion_page_id: null
 notion_synced: null
 ---
@@ -18,7 +18,7 @@ notion_synced: null
 
 # Wiki Index
 
-*총 32개 페이지(색인 2개 제외). 마지막 갱신: 2026-08-15*
+*총 33개 페이지(색인 2개 제외). 마지막 갱신: 2026-08-16*
 
 전체 운영 규칙은 저장소 루트의 `CLAUDE.md`. 작업 이력은 [[log]].
 
@@ -33,6 +33,7 @@ notion_synced: null
 - [[mysql-operations]] — 백업 도구 분기, Undo·장기 트랜잭션, 락, 버전 이정표. **회수 릴리스와 8.0.42 회귀가 업그레이드 하드 필터** ( #mysql #aurora #backup)
 - [[mysql-dump-load]] — mysqldump/MySQL Shell 논리 백업·이관 레퍼런스. **관리형 DB 대상 옵션 5종은 고정값, `--databases` 누락이 오적재 1순위.** 실기 검증 전 ( #mysql #backup #migration)
 - [[postgresql-operations]] — 접속·SCRAM 인증, Role/스키마·확장 모듈, 파라미터, CONCURRENTLY, XID wraparound 운영 기준 ( #postgresql #security #vacuum #monitoring)
+- [[postgresql-object-operations]] — 소유권·SET ROLE, 트랜잭션 DDL, 테이블 복사, 온라인 인덱스·파티션, 뷰·시퀀스 안전 기준 ( #postgresql #ddl #index #partitioning)
 - [[sqlserver-xevent-sessions]] — XEvent 세션 3종 정의. **데드락은 `system_health`가 이미 잡으므로 만들지 않고, 블로킹은 없으므로 필수.** 825는 severity 10이라 번호로 열거 ( #sqlserver #xevent #monitoring)
 - [[sqlserver-backup-procedure]] — `SP_DB_BACKUP` 결함 5건 수정본. **정리 조건에 DB 식별자가 없어 타 DB 백업을 지우던 것을 3중 한정으로 교정.** 실행 검증 전 ( #sqlserver #backup #retention)
 - [[sqlserver-operations]] — **신규 인스턴스 구축 표준**(Collation·TempDB·sp_configure·Trace flag), 에러로그 순환 Job, 백업 프로시저와 결함 5건, VLF, Parameter Sniffing, AG vs FCI ( #sqlserver #provisioning #backup #ha)

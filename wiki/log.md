@@ -6,7 +6,7 @@ summary: 위키에 대한 모든 쓰기 작업의 시간순 기록. 최신이 �
 sources: [작업 수행 기록]
 status: reviewed
 created: 2026-08-04
-updated: 2026-08-15
+updated: 2026-08-16
 notion_page_id: null
 notion_synced: null
 ---
@@ -17,6 +17,8 @@ notion_synced: null
 > - 이 로그가 건강검진의 입력이다 — 마지막 LINT 이후 쌓인 변경분이 다음 점검 범위
 
 # Wiki Log
+
+- [2026-08-16T00:02:00+09:00] INGEST source="Codex attachment: pasted PostgreSQL 오브젝트 메모" pages_created=1 pages_updated=3 mode=append note="오브젝트 소유권·DDL·복사·인덱스·파티션·뷰·시퀀스 런북 분리, current_user/session_user·char·pg_repack 무잠금 표현 교정"
 
 - [2026-08-15T21:45:34+09:00] INGEST source="Codex attachment: pasted PostgreSQL 운영 메모" pages_created=0 pages_updated=2 mode=append note="접속·SCRAM 인증·스키마·확장 모듈·오픈 게이트 병합, MD5/trust·광역 HBA 예시 교정"
 
