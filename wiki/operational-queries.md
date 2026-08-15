@@ -145,7 +145,7 @@ CROSS APPLY sys.dm_exec_sql_text(r.sql_handle) t
 WHERE r.blocking_session_id <> 0;
 ```
 
-> `blocked process report`를 쓰려면 `sp_configure 'blocked process threshold'`가 0보다 커야 하고(구축 표준은 1초 — [[sqlserver-operations]]), 이벤트는 Extended Events로 수집한다. `system_health`에는 이 이벤트가 없어 **전용 세션이 필수**다 — 세션 정의는 [[sqlserver-xevent-sessions]].
+> `blocked process report`를 쓰려면 `sp_configure 'blocked process threshold'`가 0보다 커야 하고(구축 표준은 **5초** — [[sqlserver-operations]]), 이벤트는 Extended Events로 수집한다. `system_health`에는 이 이벤트가 없어 **전용 세션이 필수**다 — 세션 정의는 [[sqlserver-xevent-sessions]].
 >
 > 위 쿼리는 **지금 이 순간의 블로킹**을 본다. 이미 끝난 블로킹의 사후 분석은 XEvent 파일 쪽이다.
 
