@@ -3,22 +3,19 @@ title: SQL Server 운영 지식 — VLF·스니핑·HA·버전
 category: db운영
 tags: [dba, sqlserver, performance, ha, version]
 summary: VLF 관리, Parameter Sniffing 대응 우선순위, 성능 카운터 현대 기준값, Always On AG vs FCI, 설치·설정 표준, 2019/2022/2025 버전 비교, T-SQL 실무 패턴.
-sources: ["Notion: SQL Server 지식 인덱스 트리 (2026-07-30)"]
+sources: ["Notion: SQL Server 지식 인덱스 트리 (2026-07-30)", "Microsoft Learn: Server memory configuration options", "Microsoft Learn: Configure MAXDOP", "Microsoft Learn: tempdb database", "Microsoft Learn: Database instant file initialization"]
 status: draft
 created: 2026-08-04
-updated: 2026-08-04
+updated: 2026-08-15
 notion_page_id: null
 notion_synced: null
 ---
 
 > [!tip] 핵심 Takeaway
-> - **PLE 300초는 구식 기준이다.** 현대 서버는 1,000~3,000초+. 옛 임계치를 그대로 쓰는 알람은 상시 오탐이거나 상시 무탐이다 — 기준값 현행화가 먼저
-> - **SQL Server 2016 연장 지원이 2026-07-15에 종료됐다.** ESU 또는 업그레이드 — 잔존 인스턴스 조사가 지연된 과제
-> - **Parameter Sniffing 대응은 순서가 있다**: 쿼리 재작성 → PSP 최적화(2022+) → `OPTION(RECOMPILE)`/`OPTIMIZE FOR` → 로컬 변수 → 전역 설정. 전역부터 손대면 다른 쿼리가 망가진다
-> - **AG는 DB 단위, FCI는 인스턴스 단위**(로그인·Job 포함 페일오버). HA 설계 문의에 답할 때 이 구분이 첫 질문
-> - **`sp_configure` 값 중 MAXDOP·메모리는 환경 종속이다** — 문서의 고정값을 복붙하면 안 된다. 반대로 backup compression·blocked process threshold·optimize for ad hoc·DAC는 표준으로 박아도 된다
-> - `MERGE`는 동시성 버그로 운영 비권장 → `UPDLOCK+HOLDLOCK` 패턴. NOLOCK 대신 RCSI
-> - 2025(17.x)는 VECTOR 타입 + DiskANN, 네이티브 JSON, T-SQL RegEx, Optimized Locking — 신규 제품 검토 시 확인 지점
+> - 신규 설치는 버전·에디션·RPO/RTO를 먼저 확정하고, 설치 직후 **CU·메모리 상한·TempDB·백업 복구 테스트**를 배포 게이트로 검사한다
+> - `min server memory = max server memory`로 고정하지 않는다. `min=0`에서 시작하고, `max`는 OS·백업 버퍼·에이전트·동일 호스트의 다른 인스턴스가 쓸 메모리를 제외해 산정한다
+> - MAXDOP·Cost Threshold·TempDB 크기는 고정값을 복붙하지 말고 NUMA/CPU 구조와 실제 대기 통계로 검증한다
+> - Parameter Sniffing은 쿼리 재작성 → PSP(2022+) → 쿼리 단위 힌트 순으로 대응하고, 인스턴스 전역 변경은 최후에 한다
 
 # SQL Server 운영 지식
 
@@ -45,12 +42,38 @@ notion_synced: null
 
 ## 설치·설정 표준
 
-- 혼합 모드 후 `ALTER LOGIN sa DISABLE` + 명명 관리자 계정(CHECK_POLICY/EXPIRATION ON, 비밀번호는 시크릿 저장소 주입).
-- TempDB mdf 파일 코어 수 기준 최대 8개. 즉시 파일 초기화(2016+ 설치 옵션, ldf는 2022부터 64MB 제한 지원).
-- sp_configure: backup compression 1, blocked process threshold 1s, optimize for ad hoc 1, DAC 1, min=max server memory. (MAXDOP·메모리 값은 환경별 — 문서의 고정값 복붙 금지.)
-- Trace flag 1204/1222(데드락 로그), 3226(백업 성공 로그 억제). 845/1118은 현대 버전 불필요.
-- DTC는 필요 시에만 + `XACT_ABORT ON` 필수 (원격 오류는 로컬 TRY CATCH에 안 잡힘).
-- Ghost Record: 인덱스 리프 삭제는 마크 후 지연 삭제. 대량 삭제 루프 시 블로킹 가능 (TF661은 공간 미회수 부작용 — 신중).
+### 1. 설치 전 결정
+
+- 지원 수명과 기능 요구로 버전·에디션을 확정하고 최신 CU 적용 계획을 포함한다.
+- 데이터, 로그, TempDB, 백업 경로와 예상 용량·IOPS·증가 단위를 사전에 정한다. 데이터와 로그의 장애 영역을 가능하면 분리한다.
+- 전용 저권한 서비스 계정을 사용하고 필요한 기능(Database Engine, Agent, Full-Text 등)만 설치한다. DTC, CLR, `xp_cmdshell`, FILESTREAM은 요구가 있을 때만 활성화한다.
+- 인증은 Windows 인증을 우선한다. 혼합 모드가 필요하면 `sa`를 비활성화하고 명명 관리자 계정과 비밀 저장소를 사용한다.
+
+### 2. 설치 직후 기준선
+
+- 데이터 파일 즉시 초기화(IFI)를 활성화한다. 이는 데이터 파일 생성·증가를 빠르게 하지만 삭제된 영역이 초기화되지 않으므로 물리 디스크 접근 통제를 병행한다. 일반적인 로그 증가는 IFI 대상이 아니며 SQL Server 2022+의 64MB 이하 로그 증가만 예외다.
+- `max server memory (MB)`는 `총 RAM - OS - SQL Server 외부 할당 - 에이전트/백업/보안 제품 - 다른 인스턴스`로 시작값을 산정한다. Microsoft의 단일 인스턴스 간이 시작점은 다른 프로세스가 쓰지 않는 가용 메모리의 약 75%이며, `min server memory (MB)`는 특별한 검증 근거가 없으면 기본값 0을 유지한다. `min`과 `max`를 같거나 가깝게 두지 않는다.
+- MAXDOP는 NUMA 노드별 논리 CPU 수를 기준으로 시작한다. 단일 NUMA가 8 CPU 이하면 그 이하, 8 초과면 8을 일반 시작점으로 삼되, NUMA 경계를 넘지 않도록 하고 `CXPACKET`/`CXCONSUMER`, 처리량, 응답시간으로 재검증한다.
+- `cost threshold for parallelism`은 기본값 5를 운영 표준으로 간주하지 않는다. 대표 워크로드를 계측해 단계적으로 조정하며 MAXDOP와 함께 검증한다.
+- `tempdb` 데이터 파일은 논리 CPU가 8개 이하면 CPU 수만큼, 초과면 8개로 시작한다. 모든 데이터 파일의 초기 크기와 고정 MB 증가량을 같게 하고 정상 피크를 수용하도록 미리 할당한다. PAGELATCH 경합이 지속될 때만 4개씩 늘린다.
+- 백업 압축 기본값, 원격 DAC, `optimize for ad hoc workloads`는 운영 정책과 워크로드에 맞춰 활성화한다. `blocked process threshold`는 모니터링 수집 주기와 정상 트랜잭션 시간을 근거로 정하며 1초를 무조건 표준화하지 않는다.
+
+### 3. 데이터베이스 기본 정책
+
+- 복구 모델은 RPO에 맞춘다. FULL/BULK_LOGGED이면 전체 백업만으로 끝내지 말고 로그 백업 주기와 체인 모니터링을 함께 배포한다.
+- 데이터·로그 파일의 초기 크기와 자동 증가는 백분율이 아닌 고정 MB로 설정하고, 예상 피크를 사전 할당한다. 자동 증가는 용량 계획의 대체재가 아니라 비상 안전망이다.
+- Query Store 활성화 여부와 보존 기간을 정하고, 애플리케이션 호환성 검증 후 database compatibility level을 목표 버전에 맞춘다.
+- 사용자·서비스 계정은 최소 권한의 사용자 정의 Role로 부여한다. 세부 원칙은 [[db-access-control]]을 따른다.
+
+### 4. 운영 인수 조건
+
+- 전체·차등·로그 백업이 목적지에 생성되는지만 보지 말고 별도 검증 환경에서 실제 복원하여 RPO/RTO를 측정한다.
+- SQL Server Agent 작업, Database Mail/알림, CHECKDB, 백업 실패, 디스크 여유, 파일 자동 증가, 장기 실행·블로킹·데드락 수집을 모니터링에 연결한다. 공통 진단 쿼리는 [[operational-queries]]에 둔다.
+- 설치 설정을 코드화하고 `sys.configurations`, `sys.database_files`, 백업 이력, 서비스 계정 권한을 수집해 기대값과 비교한다. 비밀번호·접속 문자열은 결과에 저장하지 않는다.
+- 배포 전 연결 암호화와 인증서 신뢰 체인을 실제 클라이언트에서 검증하고, 고정 포트와 방화벽 규칙은 필요한 출발지에만 허용한다.
+
+- DTC는 필요 시에만 활성화하고 분산 트랜잭션 코드에는 `SET XACT_ABORT ON`을 적용한다.
+- Ghost Record는 인덱스 리프 삭제 후 지연 정리된다. 대량 삭제 루프의 블로킹을 관찰하며 TF661은 공간 미회수 부작용 때문에 자동 적용하지 않는다.
 
 ## 버전 비교
 
@@ -77,3 +100,10 @@ notion_synced: null
 - [[db-access-control]] — 고정 롤 대신 사용자 정의 Role을 쓰는 근거
 - [[cloud-platform-knowledge]] — Azure Blob 백업 절차와 TDE 주의사항
 - [[db-security-review-patterns]] — 인덱스 리빌드·Database Mail 위험 패턴
+
+## Sources
+
+- Microsoft Learn, *Server memory configuration options*
+- Microsoft Learn, *Server configuration: max degree of parallelism*
+- Microsoft Learn, *tempdb database*
+- Microsoft Learn, *Database instant file initialization*
