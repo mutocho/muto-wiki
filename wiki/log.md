@@ -20,6 +20,7 @@ notion_synced: null
 
 ## 2026-08
 
+- [2026-08-15T17:45:00+09:00] UPDATE page="CLAUDE.md" note="§6 Notion 동기화에 §6.1 배치(db운영=엔진별, 업무기록=회사별·현재 kakaogames)·§6.2 병합(기존 페이지 있으면 신규 생성 금지) 규칙 추가. README.md 요약 반영"
 - [2026-08-15T17:30:00+09:00] FIX note="Codex 세션 시작/종료 git 자동 동기화 추가 — .codex/hooks.json 신규. $CLAUDE_PROJECT_DIR가 Codex에 없어 $(git rev-parse --show-toplevel)로 대체. CLAUDE.md §1·§8, README.md 반영. Codex 실행 검증 미완"
 - [2026-08-15T16:48:00+09:00] QUERY query="DSQL에 대해 정리해줘" result_pages=1 note="기존 [[aurora-dsql]]로 답변. 신규 정보 없어 페이지 변경 없음"
 - [2026-08-15] MIGRATE source="llm-wiki/second-brain" pages=29 raw_archived=19 note="플랫 구조로 이전. 폴더 계층(dba/career/personal/references/synthesis) 제거하고 `category` 프론트매터로 분류 전환. 전 페이지 프론트매터 신 스키마 변환 + Takeaway callout 신규 작성. wikilink 경로 접두어 전면 제거. `_hub.md` 2개·`ROUTING.md`·`hot.md` 폐지(index.md와 CLAUDE.md가 대체)"
