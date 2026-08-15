@@ -43,4 +43,5 @@ notion_synced: null
 - [[operational-queries]] — 권한 감사(12)·권한 부여(13)의 실제 쿼리
 - [[postgresql-operations]] — PG 롤 설계와 계정 삭제 절차 상세
 - [[mysql-operations]] · [[sqlserver-operations]] — 엔진별 권한 운영 맥락
+- [[sqlserver-backup-procedure]] — `xp_cmdshell`을 켜지 않고 백업을 수행하도록 고친 사례. 운영 프로시저에 어디까지 권한을 요구할지의 판단 기준
 - [[dev-tooling-standards]] — 자격증명을 env로 주입하는 개발 쪽 원칙

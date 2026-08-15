@@ -1085,6 +1085,7 @@ COMMIT TRAN;
 - 미수록: 파티션 현황, 통계 최신성(마지막 ANALYZE/UPDATE STATISTICS), 백업 이력 조회, Aurora 전용 지표 뷰, `TRUNCATE` 절차, 행 수준 보안(RLS)·컬럼 마스킹 설정.
 - 13~15의 변경 명령은 **개발/QA에서 실행 확인 후 운영 절차서로 승격**할 대상이다. 특히 SQL Server `RESUMABLE`·`ONLINE` 옵션 조합, MySQL `ALGORITHM=INSTANT` 적용 가능 조건은 버전·에디션에 따라 실패하므로 사전 확인이 필요하다.
 - [[aurora-dsql]]은 이 페이지 대상이 아니다 — 시스템 카탈로그가 제한적이고 VACUUM·bloat·복제 지연 개념 자체가 없다.
+- 같은 "검증 후 승격" 등급의 스크립트로 [[sqlserver-backup-procedure]]가 있다. 백업과 **파일 삭제**를 함께 수행하므로, 정리 대상 조회를 `SELECT`으로 먼저 확인하는 절차가 13~15보다 더 엄격하게 요구된다.
 
 ## Related
 
