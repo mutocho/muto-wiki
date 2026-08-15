@@ -9,8 +9,8 @@ sources:
 status: reviewed
 created: 2026-08-04
 updated: 2026-08-15
-notion_page_id: null
-notion_synced: null
+notion_page_id: "3bdfb969-b8be-8149-b60c-c66dd89d11cb"
+notion_synced: "2026-08-15T19:18:14+0900"
 ---
 
 > [!tip] 핵심 Takeaway

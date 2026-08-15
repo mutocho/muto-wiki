@@ -8,8 +8,8 @@ source_url: "https://github.com/obra/superpowers"
 status: draft
 created: 2026-08-12
 updated: 2026-08-12
-notion_page_id: null
-notion_synced: null
+notion_page_id: "3bdfb969-b8be-8114-9eb8-f50fffb1d72b"
+notion_synced: "2026-08-15T19:27:49+0900"
 ---
 
 > [!tip] 핵심 Takeaway

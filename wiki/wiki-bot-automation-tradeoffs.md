@@ -7,8 +7,8 @@ sources: [작업 세션 기록 (2026-08-11)]
 status: draft
 created: 2026-08-12
 updated: 2026-08-12
-notion_page_id: null
-notion_synced: null
+notion_page_id: "3bdfb969-b8be-8115-a22c-e80c43b9191d"
+notion_synced: "2026-08-15T18:53:45+0900"
 ---
 
 > [!tip] 핵심 Takeaway
