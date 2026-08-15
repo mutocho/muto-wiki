@@ -5,12 +5,18 @@
   frontmatter      -> 제거하고 메타 정보를 상단 인용으로
   > [!tip] ...     -> <callout>
   GFM 파이프 테이블 -> <table> XML
-  [[wikilink]]     -> `백틱` (Notion에 링크 대상이 없으므로)
+  [[wikilink]]     -> <mention-page/>  (대상에 notion_page_id가 있을 때)
+                      없으면 `백틱` (아직 Notion에 올라가지 않은 페이지)
   ^[inferred]      -> *(inferred)*  ('^' '[' ']'는 Notion에서 이스케이프 문자)
   들여쓰기 공백     -> 탭 (Notion은 탭으로 중첩을 표현)
 
 코드블록 안은 어떤 변환도 하지 않는다.
+
+wikilink는 self-closing <mention-page url="..."/> 로 낸다 — 제목은 Notion이
+자동 표시하므로 위키 제목과 Notion 제목이 달라도 어긋나지 않는다.
 """
+import glob
+import os
 import re
 import sys
 import pathlib
@@ -56,9 +62,37 @@ def unmask_code(text, blocks):
     return text
 
 
+def load_page_ids():
+    """wiki/*.md 프론트매터에서 slug -> notion_page_id 맵을 만든다.
+
+    아직 동기화되지 않은(=id가 null인) 페이지는 맵에 없으므로 백틱으로 남는다.
+    """
+    wiki = pathlib.Path(__file__).resolve().parent.parent / "wiki"
+    ids = {}
+    for f in glob.glob(str(wiki / "*.md")):
+        m = re.search(r'^notion_page_id:\s*"([^"]+)"',
+                      open(f, encoding="utf-8").read(), re.M)
+        if m:
+            ids[os.path.basename(f)[:-3]] = m.group(1).replace("-", "")
+    return ids
+
+
+PAGE_IDS = load_page_ids()
+
+
+def link(target, label):
+    """대상이 Notion에 있으면 mention, 없으면 백틱."""
+    pid = PAGE_IDS.get(target.strip())
+    if pid:
+        return f'<mention-page url="https://app.notion.com/p/{pid}"/>'
+    return f"`{label.strip()}`"
+
+
 def conv_inline(s):
-    s = re.sub(r"\[\[([^\]\|]+)\|([^\]]+)\]\]", lambda m: f"`{m.group(2)}`", s)
-    s = re.sub(r"\[\[([^\]]+)\]\]", lambda m: f"`{m.group(1)}`", s)
+    s = re.sub(r"\[\[([^\]\|]+)\|([^\]]+)\]\]",
+               lambda m: link(m.group(1), m.group(2)), s)
+    s = re.sub(r"\[\[([^\]]+)\]\]",
+               lambda m: link(m.group(1), m.group(1)), s)
     s = re.sub(r"\^\[([^\]]*)\]", lambda m: f" *({m.group(1)})*", s)
     return s
 
