@@ -32,7 +32,7 @@ notion_synced: null
 
 - [[mysql-operations]] — 백업 표준, Undo·장기 트랜잭션, 락, 버전 이정표. **회수 릴리스와 8.0.42 회귀가 업그레이드 하드 필터** ( #mysql #aurora #backup)
 - [[postgresql-operations]] — 계정·파라미터 베이스라인, CONCURRENTLY 원칙, XID wraparound 단계별 알람 ( #postgresql #vacuum #monitoring)
-- [[sqlserver-operations]] — VLF, Parameter Sniffing 대응 순서, AG vs FCI, 2019/2022/2025 비교 ( #sqlserver #performance #ha)
+- [[sqlserver-operations]] — **신규 인스턴스 구축 표준**(Collation·TempDB·sp_configure·Trace flag), 에러로그 순환 Job, 백업 프로시저와 결함 4건, VLF, Parameter Sniffing, AG vs FCI ( #sqlserver #provisioning #backup #ha)
 - [[db-common-concepts]] — 3사 저장 단위·격리수준·MVCC·문법 비교표 + SQL 안티패턴 체크리스트 ( #comparison #sql)
 - [[mysql-partition-pruning-prepared-stmt-bug]] — Bug #119309. **증상 없음 ≠ 안전**. 영향 범위 판정 기준을 뒤집은 자체 규명 ( #mysql #bug #partitioning)
 - [[aurora-vs-mysql-replication-architecture]] — 독립 binlog apply와 공유 스토리지 redo apply의 성능·lag 차이 ( #aurora #replication)
@@ -48,7 +48,7 @@ notion_synced: null
 ### 보안·권한
 
 - [[db-access-control]] — Role 분리, break-glass, 엔진별 금지 권한, PG 계정 삭제 순서 ( #security #access-control)
-- [[db-security-review-patterns]] — 문서·스크립트 감사 체크리스트. **일상 절차에 섞인 보안 완화 단계를 먼저 찾는다** ( #security #checklist)
+- [[db-security-review-patterns]] — 문서·스크립트 감사 체크리스트. **일상 절차에 섞인 보안 완화 단계를 먼저 찾는다.** 백업 스크립트가 검토 1순위 ( #security #checklist)
 
 ### 개발·자동화
 
@@ -109,6 +109,9 @@ notion_synced: null
 - **[[notion-llm-wiki-governance]] 역할 분담** — Notion 포털 vs 로컬 위키. 정하지 않으면 이중 관리가 계속된다
 - **[[db-security-review-patterns]] 재검증 주기** — "마지막 검증일 + N개월" 규칙 부재
 - **[[sqlserver-operations]] 2016 잔존 인스턴스** — 연장 지원 2026-07-15 종료
+- **[[sqlserver-operations]] `SP_DB_BACKUP` 결함 4건** — 전역 보관 정책에 의한 타 DB 백업 삭제, xp_cmdshell 잔류, 파싱 예외, 무알람 실패. **수정 전 자동 스케줄 금지**
+- **[[sqlserver-operations]] XEvent 세션 표준** — 수집 대상 4종만 있고 필터·타깃·보관 정책 미정
+- **[[sqlserver-operations]] Collation 적정성** — `Latin1_General_CI_AS_KS`가 한글 정렬에 맞는지 미확인
 - **[[dev-automation-detail]] Slack scope 축소** — 12개 중 3개 실사용 근거 미확인, 토큰 회전 절차 부재
 - **[[aurora-dsql]] 미확인 3건** — Firecracker 1:1, buffer pool 부재, v2 PG18. 세미나 발언만 존재
 - **[[aws-aidlc-workflows-v2-study]] Superpowers 비교** — 항목별 상세 비교 미완 → [[todo]]

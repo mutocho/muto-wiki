@@ -20,6 +20,7 @@ notion_synced: null
 
 ## 2026-08
 
+- [2026-08-15T18:05:00+09:00] INGEST source="대화 붙여넣기 — SQL Server 구축 표준 메모" pages_created=0 pages_updated=3 note="sqlserver-operations에 구축 표준·운영 Job/프로시저·Open Questions 신설. db-security-review-patterns에 위험 패턴 4건 추가(xp_cmdshell 토글, TRUSTWORTHY, 삭제 조건 식별자 누락, SELECT 오류 반환). index.md 미완 과제 3건 추가. 실 서비스 DB명·인스턴스 번호·개인 계정명은 §9-2로 제외"
 - [2026-08-15T17:52:00+09:00] UPDATE page="CLAUDE.md" note="§6.1 `엔진 공통`에 소분류 5개(엔진 비교/진단·운영 표준/보안·권한/개발·자동화/지식 운영) 추가. index.md 절 이름과 일치시키는 규칙 명문화"
 - [2026-08-15T17:45:00+09:00] UPDATE page="CLAUDE.md" note="§6 Notion 동기화에 §6.1 배치(db운영=엔진별, 업무기록=회사별·현재 kakaogames)·§6.2 병합(기존 페이지 있으면 신규 생성 금지) 규칙 추가. README.md 요약 반영"
 - [2026-08-15T17:30:00+09:00] FIX note="Codex 세션 시작/종료 git 자동 동기화 추가 — .codex/hooks.json 신규. $CLAUDE_PROJECT_DIR가 Codex에 없어 $(git rev-parse --show-toplevel)로 대체. CLAUDE.md §1·§8, README.md 반영. Codex 실행 검증 미완"
