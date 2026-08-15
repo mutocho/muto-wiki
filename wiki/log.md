@@ -18,6 +18,8 @@ notion_synced: null
 
 # Wiki Log
 
+- [2026-08-15T21:45:34+09:00] INGEST source="Codex attachment: pasted PostgreSQL 운영 메모" pages_created=0 pages_updated=2 mode=append note="접속·SCRAM 인증·스키마·확장 모듈·오픈 게이트 병합, MD5/trust·광역 HBA 예시 교정"
+
 - [2026-08-15T21:38:04+09:00] QUERY query="SQL Server 설정 방법 정리" result_pages=1 note="공식 문서 대조 후 메모리·MAXDOP·TempDB·설치 및 운영 인수 기준 갱신"
 
 ## 2026-08
