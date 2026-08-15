@@ -20,6 +20,7 @@ notion_synced: null
 
 ## 2026-08
 
+- [2026-08-15T21:35:00+09:00] FIX page="index" note="페이지 수 3중 기재(Takeaway·부제·절 제목 5개) → 부제 한 줄로 통합. CLAUDE.md가 요구하지 않는 자체 부가물이었고, 적재 1건당 편집이 3회 늘어나는 원인. 근거 LINT가 없는 '깨진 링크 0 / 고아 페이지 0' 주장도 제거 — 마지막 LINT는 2026-08-04이며 그때 broken_links=2였다"
 - [2026-08-15T21:20:00+09:00] INGEST source="붙여넣기 — MySQL Dump & Load 가이드" pages_created=1 pages_updated=6 note="mysql-dump-load 신규. mysql-operations의 백업 표준 6줄은 도구 분기 판단으로 유지하고 실행 상세를 분리(sqlserver-operations↔sqlserver-backup-procedure 선례). Takeaway에 관리형 DB 고정 옵션 5종 추가. 역링크 5건(db-access-control, cloud-platform-knowledge, aurora-vs-mysql-replication-architecture, verbal-source-verification-policy, db-security-review-patterns). dumpBinlogs since ↔ compatibility 배타 조건을 index 미완 과제로 등록"
 - [2026-08-15T21:05:00+09:00] QUERY query="SQL Server 설정값" result_pages=3 note="sqlserver-operations(sp_configure·Trace flag·TempDB·Collation), sqlserver-xevent-sessions(blocked process threshold 전제), operational-queries. 새 지식 없어 페이지 갱신 없음"
 - [2026-08-15T20:45:00+09:00] SYNC_NOTION pages=31 note="교차참조 전환 — 위키링크를 <mention-page/>로 변경. scripts/notion-convert.py가 notion_page_id 맵을 참조해 링크를 직접 내도록 수정(2차 패스 영구 불필요). 이미 올라간 31개는 content_updates로 일회성 치환(슬러그형+표시명형 양쪽 투입, 미매칭 쌍은 무시됨). 전 페이지 회귀 테스트 235개 mention 생성/잔존 wikilink 0. CLAUDE.md §6.4 교차참조 항목 갱신"
