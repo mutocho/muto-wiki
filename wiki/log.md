@@ -18,6 +18,8 @@ notion_synced: null
 
 # Wiki Log
 
+- [2026-08-15T21:38:04+09:00] QUERY query="SQL Server 설정 방법 정리" result_pages=1 note="공식 문서 대조 후 메모리·MAXDOP·TempDB·설치 및 운영 인수 기준 갱신"
+
 ## 2026-08
 
 - [2026-08-15T16:48:00+09:00] QUERY query="DSQL에 대해 정리해줘" result_pages=1 note="기존 [[aurora-dsql]]로 답변. 신규 정보 없어 페이지 변경 없음"
