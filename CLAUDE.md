@@ -291,11 +291,16 @@ Notion에서 직접 편집한 내용은 회수하지 않는다 — 편집은 항
 ```
 <부모 페이지>
 ├── db운영
-│   ├── MySQL          ← Aurora MySQL · RDS MySQL · Community MySQL 전부 여기
-│   ├── PostgreSQL     ← Aurora PostgreSQL · RDS PostgreSQL · Community PG
-│   ├── SQL Server     ← Azure SQL · RDS SQL Server 포함
+│   ├── MySQL                  ← Aurora MySQL · RDS MySQL · Community MySQL 전부 여기
+│   ├── PostgreSQL             ← Aurora PostgreSQL · RDS PostgreSQL · Community PG
+│   ├── SQL Server             ← Azure SQL · RDS SQL Server 포함
 │   ├── Aurora DSQL
-│   └── 엔진 공통      ← 3사 대조·진단 표준·보안·자동화·지식 운영
+│   └── 엔진 공통
+│       ├── 엔진 비교          ← 3사 대조 개념, 클라우드 플랫폼 공통 지식
+│       ├── 진단·운영 표준     ← 진단 쿼리, 모니터링, 장애 대응 절차
+│       ├── 보안·권한          ← 계정·권한 설계, 감사 체크리스트
+│       ├── 개발·자동화        ← 툴링 표준, 에이전트·봇
+│       └── 지식 운영          ← 위키·포털 거버넌스
 ├── 업무기록
 │   └── kakaogames
 ├── 개인
@@ -313,6 +318,15 @@ Notion에서 직접 편집한 내용은 회수하지 않는다 — 편집은 항
 - 두 엔진 이상을 **대등하게** 다루는 페이지는 `엔진 공통`. 특정 엔진이 주(主)이고
   나머지가 비교용이면 주 엔진 쪽에 둔다
 - 새 엔진이 등장하면 하위 페이지를 만들기 전에 **사용자에게 확인받는다**
+
+**`엔진 공통` 소분류** — [[index]]의 `db운영` 소절과 **이름을 맞춘다.**
+두 곳이 갈라지면 같은 페이지가 목차와 Notion에서 서로 다른 곳에 놓여 찾을 수 없게 된다.
+
+- 소분류를 바꾸면 `index.md`의 절도 **함께** 고친다
+- 예외 1건 — `index.md`의 `엔진별 운영` 절은 Notion에서 **엔진 그룹 4개 + `엔진 비교`로 갈라진다.**
+  목차는 엔진 수가 적어 한 절로 묶여 있고, Notion은 엔진별로 나누기 때문이다
+- 소분류 어디에도 넣기 애매하면 새 소분류를 만들기 전에 **사용자에게 확인받는다.**
+  `엔진 공통` 바로 아래에 페이지를 흘려두지 않는다
 
 **회사 판정 기준** — `업무기록`은 회사별로 묶는다.
 

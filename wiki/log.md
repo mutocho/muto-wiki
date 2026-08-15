@@ -20,6 +20,7 @@ notion_synced: null
 
 ## 2026-08
 
+- [2026-08-15T17:52:00+09:00] UPDATE page="CLAUDE.md" note="§6.1 `엔진 공통`에 소분류 5개(엔진 비교/진단·운영 표준/보안·권한/개발·자동화/지식 운영) 추가. index.md 절 이름과 일치시키는 규칙 명문화"
 - [2026-08-15T17:45:00+09:00] UPDATE page="CLAUDE.md" note="§6 Notion 동기화에 §6.1 배치(db운영=엔진별, 업무기록=회사별·현재 kakaogames)·§6.2 병합(기존 페이지 있으면 신규 생성 금지) 규칙 추가. README.md 요약 반영"
 - [2026-08-15T17:30:00+09:00] FIX note="Codex 세션 시작/종료 git 자동 동기화 추가 — .codex/hooks.json 신규. $CLAUDE_PROJECT_DIR가 Codex에 없어 $(git rev-parse --show-toplevel)로 대체. CLAUDE.md §1·§8, README.md 반영. Codex 실행 검증 미완"
 - [2026-08-15T16:48:00+09:00] QUERY query="DSQL에 대해 정리해줘" result_pages=1 note="기존 [[aurora-dsql]]로 답변. 신규 정보 없어 페이지 변경 없음"
