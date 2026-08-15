@@ -12,8 +12,8 @@ category: db운영
 status: verified
 created: 2026-08-04
 updated: 2026-08-04
-notion_page_id: null
-notion_synced: null
+notion_page_id: "3bdfb969-b8be-8125-a96b-cabce44b6c55"
+notion_synced: "2026-08-15T19:21:54+0900"
 ---
 
 > [!tip] 핵심 Takeaway

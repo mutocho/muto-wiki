@@ -8,8 +8,8 @@ status: draft
 due: 2026-09-05
 created: 2026-08-07
 updated: 2026-08-12
-notion_page_id: null
-notion_synced: null
+notion_page_id: "3bdfb969-b8be-81b2-b6ee-eeff5b59818e"
+notion_synced: "2026-08-15T18:53:45+0900"
 ---
 
 > [!tip] 핵심 Takeaway

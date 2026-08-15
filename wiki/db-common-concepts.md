@@ -7,8 +7,8 @@ sources: ["Notion: DB 공통 개념 인덱스 트리 (2026-07-30)"]
 status: draft
 created: 2026-08-04
 updated: 2026-08-04
-notion_page_id: null
-notion_synced: null
+notion_page_id: "3bdfb969-b8be-81df-907f-f5f32fd9914b"
+notion_synced: "2026-08-15T19:05:47+0900"
 ---
 
 > [!tip] 핵심 Takeaway
