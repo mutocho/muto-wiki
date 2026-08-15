@@ -113,7 +113,6 @@ notion_synced: null
 - **[[sqlserver-operations]] 2016 잔존 인스턴스** — 연장 지원 2026-07-15 종료
 - **[[sqlserver-backup-procedure]] 실행 검증** — 결함 5건 수정본 작성 완료, 개발/QA 미검증. **정리 단계 삭제 대상을 `SELECT`으로 확인한 뒤 운영 적용**. 원본은 그때까지 자동 스케줄 금지
 - **[[sqlserver-xevent-sessions]] 임계값·알람** — 3초/5초는 실측 근거 없음. 수집만 하고 알람 연동이 없어 [[monitoring-incident-runbook]]과 끊겨 있다
-- **`blocked process threshold` 불일치** — [[sqlserver-operations]] 구축 표준 1초 vs [[sqlserver-xevent-sessions]] 5초. 결정 필요
 - **[[sqlserver-operations]] Collation 적정성** — `Latin1_General_CI_AS_KS`가 한글 정렬에 맞는지 미확인
 - **[[dev-automation-detail]] Slack scope 축소** — 12개 중 3개 실사용 근거 미확인, 토큰 회전 절차 부재
 - **[[aurora-dsql]] 미확인 3건** — Firecracker 1:1, buffer pool 부재, v2 PG18. 세미나 발언만 존재

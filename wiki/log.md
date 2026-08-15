@@ -20,6 +20,7 @@ notion_synced: null
 
 ## 2026-08
 
+- [2026-08-15T18:55:00+09:00] FIX note="blocked process threshold 1초→5초로 통일. sqlserver-operations(sp_configure 블록·Takeaway·Open Questions), sqlserver-xevent-sessions(경고→근거 note, 원래 값 1초 보존), operational-queries, index.md 미완 과제 제거. ^[ambiguous] 2곳 해소"
 - [2026-08-15T18:40:00+09:00] UPDATE page="sqlserver-xevent-sessions" note="신규 — XEvent 세션 3종(slow query·blocked process·error reported) 정의 + 데드락 미생성 근거. MS Learn으로 system_health 수집 범위 대조: 데드락 포함/blocked_process_report 미포함/error는 sev>=20만 확인. blocked process threshold 1초(구축표준) vs 5초(이 페이지) 불일치를 ^[ambiguous]로 기록. 역링크 5개 연결. index 30→31, db운영 19→20"
 - [2026-08-15T18:20:00+09:00] UPDATE page="sqlserver-backup-procedure" note="신규 — SP_DB_BACKUP 결함 5건 수정본 작성(5번째 CHECKSUM/COMPRESSION 결합은 이번에 추가 발견). 파일명·디바이스명 형식 유지로 기존 백업 호환. 역링크 4개(sqlserver-operations, db-security-review-patterns, operational-queries, db-access-control) 연결. index 페이지 수 29→30, db운영 18→19"
 - [2026-08-15T18:05:00+09:00] INGEST source="대화 붙여넣기 — SQL Server 구축 표준 메모" pages_created=0 pages_updated=3 note="sqlserver-operations에 구축 표준·운영 Job/프로시저·Open Questions 신설. db-security-review-patterns에 위험 패턴 4건 추가(xp_cmdshell 토글, TRUSTWORTHY, 삭제 조건 식별자 누락, SELECT 오류 반환). index.md 미완 과제 3건 추가. 실 서비스 DB명·인스턴스 번호·개인 계정명은 §9-2로 제외"

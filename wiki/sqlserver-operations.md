@@ -14,7 +14,7 @@ notion_synced: null
 ---
 
 > [!tip] 핵심 Takeaway
-> - **구축 표준의 `sp_configure` 값은 두 종류로 갈린다.** backup compression·blocked process threshold 1s·optimize for ad hoc·DAC는 **전 인스턴스 하드코딩 가능**. MAXDOP·min/max memory·fill factor는 **환경 종속이라 복붙 금지** — 프로비저닝 자동화에서 이 둘을 반드시 분리한다
+> - **구축 표준의 `sp_configure` 값은 두 종류로 갈린다.** backup compression·blocked process threshold 5s·optimize for ad hoc·DAC는 **전 인스턴스 하드코딩 가능**. MAXDOP·min/max memory·fill factor는 **환경 종속이라 복붙 금지** — 프로비저닝 자동화에서 이 둘을 반드시 분리한다
 > - **`SP_DB_BACKUP`은 현 상태로 자동 스케줄 금지.** 보관 정책이 DB별이 아니라 **확장자 기준 전역**이라 한 DB의 백업 실행이 다른 DB의 백업 파일을 지운다. 수정 전에는 수동 실행만
 > - **일상 백업 절차 안에서 `xp_cmdshell`을 켰다 끈다** — 중단되면 켜진 채 남는다. [[db-security-review-patterns]]의 "일상 절차에 보안 상태 변경 혼입" 패턴에 정확히 해당
 > - **`TRUSTWORTHY ON`은 권한 상승 경로다.** DB 소유자가 sysadmin이면 db_owner가 인스턴스 전체를 장악할 수 있다. `EXECUTE AS OWNER`가 실제로 필요한 DB에만, 소유자를 확인하고 켠다
@@ -81,7 +81,7 @@ notion_synced: null
 
 ```sql
 EXEC sp_configure 'backup compression default', 1;      -- 백업 압축
-EXEC sp_configure 'blocked process threshold (s)', 1;   -- 1초 이상 블로킹 보고서
+EXEC sp_configure 'blocked process threshold (s)', 5;   -- 5초 이상 블로킹 보고서
 EXEC sp_configure 'optimize for ad hoc workloads', 1;   -- 2회 실행 시에만 플랜 캐시 적재
 EXEC sp_configure 'remote admin connections', 1;        -- DAC 원격 접속
 ```
@@ -188,9 +188,6 @@ DB명·경로·백업 타입(F/L/D)·보관일수·압축 여부를 받아 백�
 
 ## Open Questions
 
-- **`blocked process threshold` 값이 두 문서에서 다르다.** 이 페이지의 구축 표준은 **1초**,
-  [[sqlserver-xevent-sessions]]는 보고서 폭증을 이유로 **5초**를 제시한다. 어느 쪽을 표준으로
-  삼을지 결정이 필요하다.^[ambiguous] 1초를 유지하면 XEvent 파일 크기를 함께 키워야 한다.
 - **데드락이 최대 3중으로 기록된다.** 여기 Trace flag 1204/1222(에러로그) + `system_health`(기본
   제공, deadlock graph 포함) + 선택적 전용 XEvent 세션. 1204/1222를 유지할지 정리 대상이다.^[inferred]
 - **Collation `Latin1_General_CI_AS_KS`가 한글 데이터에 적정한지 미확인.**
