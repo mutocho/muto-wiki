@@ -20,6 +20,7 @@ notion_synced: null
 
 ## 2026-08
 
+- [2026-08-15T21:50:00+09:00] LINT issues=22 broken_links=0 orphans=0 one_way_links=4 takeaway_over_limit=15 frontmatter=0 stale=0 contradictions=2 index_mismatch=0 raw_unprocessed=0 notion_lag=1 secrets=0 note="깨진 링크 초기 4건은 백틱 예시 오탐 — 인라인 코드 제외 후 0건. 모순 2건: ① 백업 도구 규모 분기(mysql-operations '수 GB 이하' vs mysql-dump-load '~수십 GB') ② sqlserver-xevent-sessions:19 문장 논리 반전. 리포트만, 수정 미실시"
 - [2026-08-15T21:35:00+09:00] FIX page="index" note="페이지 수 3중 기재(Takeaway·부제·절 제목 5개) → 부제 한 줄로 통합. CLAUDE.md가 요구하지 않는 자체 부가물이었고, 적재 1건당 편집이 3회 늘어나는 원인. 근거 LINT가 없는 '깨진 링크 0 / 고아 페이지 0' 주장도 제거 — 마지막 LINT는 2026-08-04이며 그때 broken_links=2였다"
 - [2026-08-15T21:20:00+09:00] INGEST source="붙여넣기 — MySQL Dump & Load 가이드" pages_created=1 pages_updated=6 note="mysql-dump-load 신규. mysql-operations의 백업 표준 6줄은 도구 분기 판단으로 유지하고 실행 상세를 분리(sqlserver-operations↔sqlserver-backup-procedure 선례). Takeaway에 관리형 DB 고정 옵션 5종 추가. 역링크 5건(db-access-control, cloud-platform-knowledge, aurora-vs-mysql-replication-architecture, verbal-source-verification-policy, db-security-review-patterns). dumpBinlogs since ↔ compatibility 배타 조건을 index 미완 과제로 등록"
 - [2026-08-15T21:05:00+09:00] QUERY query="SQL Server 설정값" result_pages=3 note="sqlserver-operations(sp_configure·Trace flag·TempDB·Collation), sqlserver-xevent-sessions(blocked process threshold 전제), operational-queries. 새 지식 없어 페이지 갱신 없음"
