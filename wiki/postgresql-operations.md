@@ -6,7 +6,7 @@ summary: 계정/권한 표준 패턴, 파라미터 베이스라인, 인덱스/�
 sources: ["Notion: PostgreSQL 지식 인덱스 트리 (2026-07-30)", "도서 노트: PostgreSQL DBA를 위한 Admin 이야기"]
 status: draft
 created: 2026-08-04
-updated: 2026-08-04
+updated: 2026-08-15
 notion_page_id: "3bdfb969-b8be-8115-9fd5-f522b3c532a8"
 notion_synced: "2026-08-15T19:08:26+0900"
 ---
@@ -15,8 +15,7 @@ notion_synced: "2026-08-15T19:08:26+0900"
 > - **`idle_in_transaction_session_timeout` 미설정이 PG bloat 장애의 1순위 원인이다.** 신규 클러스터 오픈 체크리스트 최상단에 둔다 (~600s)
 > - **XID wraparound는 단계별 알람이 필수다** — age 10억 경보 / 15억 / 18억, 20억이면 강제 셧다운. cutoff가 DB 전체 단일 값이라 **슬로우 쿼리 하나가 전체 테이블의 정리를 막는다.** 이 인과관계가 대응 순서를 정한다: 장기 트랜잭션 종료 → 미사용 슬롯 drop → `vacuumdb --freeze`
 > - **`work_mem`은 쿼리 내 작업당 할당된다** — 세션당이 아니다. 전역으로 올리면 OOM. 배치 세션에서만 `SET LOCAL`
-> - **운영 인덱스 작업은 무조건 `CONCURRENTLY`.** 실패 시 INVALID가 남으므로 `pg_index.indisvalid` 확인이 후속 절차에 반드시 포함돼야 한다
-> - **FK 컬럼 인덱스는 자동 생성되지 않는다.** 스키마 리뷰 자동화의 검사 항목
+> - **인덱스 규칙 2종**: 운영 작업은 무조건 `CONCURRENTLY`이며 실패 시 INVALID가 남으므로 `pg_index.indisvalid` 확인이 후속 절차에 반드시 포함된다. 그리고 **FK 컬럼 인덱스는 자동 생성되지 않는다** — 스키마 리뷰 자동화의 검사 항목
 > - `VACUUM FULL`은 운영 금지(Access Exclusive) → `pg_repack`. `char(n)` 금지 → `text`
 > - 계정 삭제는 순서가 있다: GRANT 정리 → `REASSIGN OWNED` → `DROP OWNED` → `DROP USER` — [[db-access-control]]
 

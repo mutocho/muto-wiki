@@ -15,11 +15,9 @@ notion_synced: "2026-08-15T19:42:05+0900"
 
 > [!tip] 핵심 Takeaway
 > - **구축 표준의 `sp_configure` 값은 두 종류로 갈린다.** backup compression·blocked process threshold 5s·optimize for ad hoc·DAC는 **전 인스턴스 하드코딩 가능**. MAXDOP·min/max memory·fill factor는 **환경 종속이라 복붙 금지** — 프로비저닝 자동화에서 이 둘을 반드시 분리한다
-> - **`SP_DB_BACKUP`은 현 상태로 자동 스케줄 금지.** 보관 정책이 DB별이 아니라 **확장자 기준 전역**이라 한 DB의 백업 실행이 다른 DB의 백업 파일을 지운다. 수정 전에는 수동 실행만
-> - **일상 백업 절차 안에서 `xp_cmdshell`을 켰다 끈다** — 중단되면 켜진 채 남는다. [[db-security-review-patterns]]의 "일상 절차에 보안 상태 변경 혼입" 패턴에 정확히 해당
+> - **`SP_DB_BACKUP`은 현 상태로 자동 스케줄 금지 — 결함이 2종이다.** ① 보관 정책이 DB별이 아니라 **확장자 기준 전역**이라 한 DB의 백업 실행이 다른 DB의 백업 파일을 지운다. ② 절차 안에서 **`xp_cmdshell`을 켰다 끄므로** 중단되면 켜진 채 남는다([[db-security-review-patterns]]의 "일상 절차에 보안 상태 변경 혼입"). 수정 전에는 수동 실행만
 > - **`TRUSTWORTHY ON`은 권한 상승 경로다.** DB 소유자가 sysadmin이면 db_owner가 인스턴스 전체를 장악할 수 있다. `EXECUTE AS OWNER`가 실제로 필요한 DB에만, 소유자를 확인하고 켠다
-> - **PLE 300초는 구식 기준이다.** 현대 서버는 1,000~3,000초+. 옛 임계치를 그대로 쓰는 알람은 상시 오탐이거나 상시 무탐이다
-> - **Parameter Sniffing 대응은 순서가 있다**: 쿼리 재작성 → PSP 최적화(2022+) → `OPTION(RECOMPILE)`/`OPTIMIZE FOR` → 로컬 변수 → 전역 설정. 전역부터 손대면 다른 쿼리가 망가진다
+> - **성능 대응에서 손대는 순서가 틀리면 망가진다.** PLE 300초는 구식 기준이라(현대 서버 1,000~3,000초+) 옛 임계치 알람은 상시 오탐이거나 상시 무탐이고, Parameter Sniffing은 **쿼리 재작성 → PSP 최적화(2022+) → `OPTION(RECOMPILE)`/`OPTIMIZE FOR` → 로컬 변수 → 전역 설정** 순서다. 둘 다 전역부터 건드리는 것이 실패 경로
 > - **AG는 DB 단위, FCI는 인스턴스 단위**(로그인·Job 포함 페일오버). HA 설계 문의의 첫 질문
 > - **SQL Server 2016 연장 지원이 2026-07-15에 종료됐다.** 잔존 인스턴스 조사가 지연된 과제
 

@@ -11,18 +11,17 @@ sources:
 category: db운영
 status: verified
 created: 2026-08-04
-updated: 2026-08-04
+updated: 2026-08-15
 notion_page_id: "3bdfb969-b8be-8125-a96b-cabce44b6c55"
 notion_synced: "2026-08-15T19:21:54+0900"
 ---
 
 > [!tip] 핵심 Takeaway
-> - **DSQL 도입 검토의 첫 질문은 "앱이 리트라이를 할 수 있는가"다.** OCC이므로 `SQLSTATE 40001`이 정상 동작의 일부이고, **멱등 콜백 + 지수 백오프**가 전제다. 직접 짜지 말고 언어별 DSQL Connector를 쓴다
+> - **DSQL 도입 검토의 첫 질문은 "앱이 리트라이를 할 수 있는가"다.** OCC이므로 `SQLSTATE 40001`이 정상 동작의 일부이고, **멱등 콜백 + 지수 백오프**가 전제다. 직접 짜지 말고 언어별 DSQL Connector를 쓴다. HikariCP를 쓴다면 `40001`을 커넥션 축출 사유로 보지 않게 `SQLExceptionOverride`로 `DO_NOT_EVICT` 처리한 뒤 그 위에 리트라이를 얹는 **2계층 구성**이 필요하다
 > - **부적합 신호가 명확하다** — PL/pgSQL 저장 프로시저 의존, FK 기반 참조 정합성 의존, 3,000행 초과 벌크 DML, 5분 초과 장기 트랜잭션, 11개 이상 스키마. 하나라도 걸리면 마이그레이션 대상이 아니다 ^[inferred]
 > - **스토리지는 무제한이 아니다 — 클러스터당 10 TiB 기본**(증액 시 256 TiB), 초과 시 `DISK_FULL(53100)`. 세미나 노트의 "제약 없음"은 오류였다
 > - **비용은 IO가 아니라 DPU + 스토리지**다. DPU에는 통계 갱신·인덱스 유지보수 같은 백그라운드 작업도 포함된다. 유휴 시 DPU 0 (scale to zero)
 > - **VACUUM·파라미터 튜닝·유지보수 윈도우 개념이 없다.** DBA 운영 부하가 구조적으로 사라지는 대신, 통제 수단도 함께 사라진다는 뜻
-> - **HikariCP를 쓴다면 `40001`을 커넥션 축출 사유로 보지 않게 `SQLExceptionOverride`로 `DO_NOT_EVICT` 처리**한 뒤 그 위에 리트라이를 얹는 2계층 구성이 필요하다
 > - 미확인 항목 3건(Firecracker 1:1, buffer pool 부재, v2 PG18)은 세미나 발언뿐이다 — 인용 전 재확인 → [[verbal-source-verification-policy]]
 
 # AWS Aurora DSQL

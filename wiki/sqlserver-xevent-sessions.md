@@ -16,7 +16,7 @@ notion_synced: "2026-08-15T19:42:05+0900"
 
 > [!tip] 핵심 Takeaway
 > - **데드락 전용 세션을 만들지 마라.** `system_health`가 이미 deadlock graph를 잡는다. 별도 세션의 유일한 정당한 이유는 **보관 기간 연장**뿐이다
-> - **블로킹은 반대다 — `system_health`에 `blocked_process_report`가 없다.** 반드시 별도 세션이며, `sp_configure 'blocked process threshold (s)'`가 0보다 커야 이벤트 자체가 발생하지 않는다
+> - **블로킹은 반대다 — `system_health`에 `blocked_process_report`가 없다.** 반드시 별도 세션이며, `sp_configure 'blocked process threshold (s)'`가 **0이면 이벤트 자체가 발생하지 않는다** — 0보다 커야 수집이 시작된다
 > - **오류 수집은 severity만으로 거르면 안 된다.** `system_health`는 sev ≥ 20만 잡고, 가장 중요한 I/O 경고(825)는 **severity 10**이라 severity 필터를 통과하지 못한다 — 오류 번호를 명시 열거한다
 > - **XEvent 보관은 시간이 아니라 용량이다.** `max_file_size × max_rollover_files`가 하드 상한이므로 **바쁜 날일수록 보관 시간이 짧아진다.** 사후 분석을 전제한다면 커버 시간을 계산해 감시할 것
 > - **`EVENT_RETENTION_MODE = NO_EVENT_LOSS`는 절대 쓰지 않는다.** 이벤트 유실을 막으려다 엔진을 멈춘다

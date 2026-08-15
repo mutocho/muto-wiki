@@ -38,11 +38,17 @@ notion_synced: null
 | 부분 복구 | 낮음 (텍스트 grep) | 높음 (테이블별 파일 분리) |
 | 호환성 변환 | 없음 | `compatibility` 옵션 |
 | 설치 | 기본 포함 | 별도 설치 |
-| 권장 규모 | ~ 수십 GB | 수십 GB 이상, 이관 전반 |
+| 권장 규모 | **수 GB 이하** ^[ambiguous] | 수십 GB 이상, 이관 전반 |
 
 - 소규모 스키마 백업, 기존 스크립트 호환 → `mysqldump`
 - 이관·대용량·재시작 필요·S3 연동 → **MySQL Shell**
 - `mysqlpump`는 deprecated이며 **8.4에서 제거됐다. 신규 채택 금지**
+
+> **mysqldump 상한에 두 기준이 있다** ^[ambiguous] — 기존 사내 판단은 **수 GB 이하**([[mysql-operations]] 백업 표준),
+> 이 페이지의 원본 메모는 **수십 GB까지**로 적었다. 30 GB대에서 답이 갈린다.
+> **보수적인 쪽(수 GB 이하)을 운영 기본값으로 둔다** — Shell을 불필요하게 고르면 설치 수고로 끝나지만,
+> mysqldump로 갔다가 실패하면 재시작이 없어 처음부터다. 비대칭이 명확한 선택이다.^[inferred]
+> 실측 기준을 잡기 전까지 이 표의 값은 확정이 아니다 → Open Questions
 
 ## 2. mysqldump
 
@@ -343,6 +349,8 @@ Load 계정은 대상 스키마에 `CREATE, ALTER, INSERT, INDEX, DROP, REFERENC
 
 ## Open Questions
 
+- **mysqldump 상한 수치.** 사내 판단 "수 GB 이하"와 원본 메모 "수십 GB"가 어긋난다 ^[ambiguous].
+  덤프 시간·복구 시간을 실측해 **분(分) 단위 RTO 기준으로 재정의**하는 것이 맞다 — 크기는 대리 지표일 뿐이다^[inferred]
 - **`dumpBinlogs`의 `compatibility` 배타 조건.** RDS/Aurora 대상은 `strip_definers`가 사실상 필수인데
   `since` 덤프는 `compatibility` 사용 시 예외가 난다. 관리형 DB에서 논리 덤프 기반 시점 복구가
   성립하는지 미확인 — 실기 검증 필요

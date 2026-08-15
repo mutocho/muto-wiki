@@ -45,3 +45,4 @@ notion_synced: "2026-08-15T19:11:17+0900"
 - [[claude-code-permission-guardrails|Claude Code 권한 가드레일 동작]]
 - [[index|Wiki Index]]
 - [[vault-governance-decisions]] — 이 함정들이 반영된 구조 결정
+- [[dev-tooling-standards]] — 저장소 셋업·CI 기준. 여기 함정 대부분이 그 기준을 볼트에 적용할 때 드러난 것들이다
