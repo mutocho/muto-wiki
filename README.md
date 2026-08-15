@@ -25,8 +25,8 @@ cd /Users/muto/branch/muto-wiki
 claude          # 또는 codex
 ```
 
-Claude Code는 **열 때 자동으로 최신을 내려받고, 작업을 마치면 올린다.**
-Codex는 훅이 없으므로 `CLAUDE.md` 규칙에 따라 직접 실행한다 (아래 [git 동기화](#git-동기화) 참조).
+Claude Code와 Codex 모두 **열 때 자동으로 최신을 내려받고, 작업을 마치면 올린다.**
+각각 `.claude/settings.json`과 `.codex/hooks.json`에 훅이 걸려 있다 (아래 [git 동기화](#git-동기화) 참조).
 
 ### 읽고 탐색할 때 — Obsidian
 
@@ -143,6 +143,12 @@ PG bloat 장애 났을 때 뭐부터 봐?
 - 첫 실행 때 **대상 부모 페이지를 확인받는다.** 임의로 만들지 않는다
 - 마지막 동기화 이후 수정된 페이지만 올린다 (전체 재업로드 안 함)
 - Takeaway callout은 Notion callout 블록으로 옮긴다
+- **`db운영`은 엔진별로, `업무기록`은 회사별로 한 단계 더 묶는다** —
+  Aurora/RDS/Community MySQL은 같은 `MySQL` 그룹. 현재 회사는 `kakaogames`
+- **같은 페이지가 이미 있으면 새로 만들지 않고 병합한다.** 겹치는 절은 wiki가 이기고,
+  Notion에만 있는 절은 지우지 않는다
+
+배치·병합 판정 기준은 [CLAUDE.md §6.1 / §6.2](CLAUDE.md#61-배치--카테고리-아래를-한-단계-더-묶는다) 참조.
 
 > **Notion MCP가 연결된 Claude 세션에서만 가능하다.** Codex 등에서는 안 된다.
 > Notion에서 직접 고친 내용은 회수하지 않는다 — 편집은 항상 `wiki/`에서 한다.
@@ -157,6 +163,8 @@ muto-wiki/
 ├── CLAUDE.md          에이전트 규칙 (스키마)
 ├── AGENTS.md          → CLAUDE.md 심볼릭 링크 (Codex·기타 에이전트용)
 ├── scripts/sync.sh    git 동기화
+├── .claude/           Claude Code 훅 (settings.json)
+├── .codex/            Codex 훅 (hooks.json)
 ├── raw/               원본 자료 — 내가 넣고, 에이전트는 읽기만
 │   └── archive/       위키 반영이 끝난 원본
 └── wiki/              정리된 지식 — 에이전트가 작성·관리
@@ -224,7 +232,8 @@ Takeaway는 **내용 요약이 아니라 행동 지침**이다. "그래서 내�
 | 환경 | 동작 |
 |---|---|
 | **Claude Code** | `.claude/settings.json` 훅이 자동 실행. 손댈 것 없음 |
-| **Codex 등** | 직접 실행 — 시작 전 `pull`, 위키를 고친 뒤 `push` |
+| **Codex** | `.codex/hooks.json` 훅이 자동 실행. 손댈 것 없음 |
+| **그 외** | 직접 실행 — 시작 전 `pull`, 위키를 고친 뒤 `push` |
 
 ```bash
 bash scripts/sync.sh pull    # 세션 시작 시

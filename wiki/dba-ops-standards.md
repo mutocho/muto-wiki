@@ -7,8 +7,8 @@ sources: ["Notion: 운영 및 모니터링 (2026-07-30)", "Notion: 정제된 핵
 status: draft
 created: 2026-08-04
 updated: 2026-08-04
-notion_page_id: null
-notion_synced: null
+notion_page_id: "3bdfb969-b8be-813f-8645-cf1773d11e6c"
+notion_synced: "2026-08-15T18:53:45+0900"
 ---
 
 > [!tip] 핵심 Takeaway

@@ -6,9 +6,9 @@ summary: 세미나·사내 문서 출처는 수치·버전·한도에서 반복�
 sources: [대화 기록 (2026-08-06), 위키 내 대조 사례 5건]
 status: reviewed
 created: 2026-08-06
-updated: 2026-08-06
-notion_page_id: null
-notion_synced: null
+updated: 2026-08-15
+notion_page_id: "3bdfb969-b8be-8109-b328-c00f2a44cd07"
+notion_synced: "2026-08-15T22:55:00+0900"
 ---
 
 > [!tip] 핵심 Takeaway
@@ -61,3 +61,6 @@ notion_synced: null
 - [[notion-llm-wiki-governance|LLM Wiki 운영 거버넌스]]
 - [[cloud-platform-knowledge]] — 2022~23 세미나 수치를 `보관` 등급으로 둔 이유
 - [[vault-governance-decisions]] — 상태 승격을 자동화하지 않기로 한 거버넌스 결정
+- [[mysql-dump-load]] — 사내 가이드 출처. 옵션 조합이 실기 검증 전이라 `draft` 유지 중인 사례
+- [[sqlserver-backup-procedure]] — 사내 프로시저의 결함 5건. 구술·사내 출처의 오류가 **수치·조건절**에 몰린다는 이 정책의 추가 근거
+- [[sqlserver-xevent-sessions]] — 실측 근거 없는 임계값(3초/5초)이 표준처럼 굳는 것을 막아야 하는 사례

@@ -6,9 +6,9 @@ summary: CloudWatch→PI→엔진 내부 뷰 감시 흐름, 시간박스형(5분
 sources: ["Notion: 운영 및 모니터링 트리 (2026-07-30)"]
 status: draft
 created: 2026-08-04
-updated: 2026-08-04
-notion_page_id: null
-notion_synced: null
+updated: 2026-08-15
+notion_page_id: "3bdfb969-b8be-810a-a8d4-eccc9acaa0b8"
+notion_synced: "2026-08-15T22:55:00+0900"
 ---
 
 > [!tip] 핵심 Takeaway
@@ -16,8 +16,7 @@ notion_synced: null
 > - **시간박스 구조(5분 / 15분 / 근본)가 이 런북의 핵심 골격이다.** 장애 대응 에이전트를 만든다면 이 3단계를 그대로 상태 기계로 옮긴다 — 1차는 병목 레이어 판별까지만, 근본 원인 분석을 여기서 시도하지 않는 것이 요점
 > - **세션 kill 전에 세션 식별·롤백 소요·재시도 폭주를 점검한다.** 원본 런북에 빠져 있던 단계 — 자동 kill 기능을 만들 때 반드시 게이트로 넣는다
 > - **월간 점검의 실질은 "복구 실증"이다** — Full Recovery / PITR / DR failover 실전 테스트. 이것만 지켜져도 백업 관련 사고 대부분이 사라진다
-> - **Aurora Backtrack은 클러스터 생성 시점에만 활성화할 수 있다**(Aurora MySQL 한정, 최대 72h). 신규 클러스터 오픈 체크리스트에 넣지 않으면 영영 못 켠다
-> - 신규 클러스터 오픈 체크리스트는 그대로 IaC 템플릿 검증 항목이 된다 — 자동화 우선순위가 높은 지점
+> - **신규 클러스터 오픈 체크리스트는 그대로 IaC 템플릿 검증 항목이 된다** — 자동화 우선순위가 높은 지점. 특히 **Aurora Backtrack은 클러스터 생성 시점에만 활성화할 수 있어**(Aurora MySQL 한정, 최대 72h) 여기 빠지면 영영 못 켠다
 > - 실행 절차의 상위 원칙은 [[dba-ops-standards]], 진단 쿼리는 [[operational-queries]]
 
 # 모니터링·장애 대응 런북
@@ -71,6 +70,7 @@ PI 활성화(보존 7일+) · Enhanced Monitoring 1~15초 · Slow/Error 로그 C
 
 - [[dba-ops-standards]] — 이 런북이 구체화하는 상위 대응 원칙
 - [[operational-queries]] — 각 단계에서 실행할 진단 쿼리
+- [[sqlserver-xevent-sessions]] — SQL Server의 사후 분석 근거를 남기는 수집 세션. **수집만 하고 알람은 없어**, 이 런북과 잇는 집계 Job이 미결 과제로 남아 있다
 - [[postgresql-operations]] — XID wraparound 알람 단계와 대응 상세
 - [[mysql-operations]] — 커넥션·복제 지연 관련 파라미터 근거
 - [[cloud-platform-knowledge]] — Aurora Backtrack·페일오버 특성

@@ -6,9 +6,9 @@ summary: "정제된 핵심 가이드에서 추출한 개발 표준: Ruff check/f
 sources: ["Notion: 정제된 핵심 가이드 (2026-07-30)", "Notion: 개발 및 자동화 (2026-07-30)"]
 status: draft
 created: 2026-08-04
-updated: 2026-08-04
-notion_page_id: null
-notion_synced: null
+updated: 2026-08-15
+notion_page_id: "3bdfb969-b8be-819f-9e2a-dcec10111120"
+notion_synced: "2026-08-15T22:55:00+0900"
 ---
 
 > [!tip] 핵심 Takeaway
@@ -44,3 +44,4 @@ notion_synced: null
 - [[db-security-review-patterns]] — 자리표시자 비밀번호가 실제 위험이 된 사례
 - [[aws-aidlc-workflows-v2-study]] — 에이전트 워크플로 도구 도입 시의 판단 기준
 - [[superpowers-agentic-development-methodology]] — 개발 규율을 스킬로 강제하는 접근
+- [[obsidian-wiki-tooling-gotchas]] — 이 기준을 적용한 볼트 쪽 도구 함정(wikilink 해석, 실행 권한 diff)

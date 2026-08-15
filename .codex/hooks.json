@@ -1,0 +1,27 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$(git rev-parse --show-toplevel)/scripts/sync.sh\" pull || true",
+            "statusMessage": "위키 동기화 (pull)"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$(git rev-parse --show-toplevel)/scripts/sync.sh\" push || true",
+            "statusMessage": "위키 동기화 (push)"
+          }
+        ]
+      }
+    ]
+  }
+}

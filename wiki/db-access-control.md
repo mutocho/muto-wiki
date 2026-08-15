@@ -6,9 +6,9 @@ summary: MySQL/PostgreSQL/SQL Server 공통 계정 설계 원칙 — Role/로그
 sources: ["Notion: DB 운영 쿼리 인덱스 하위 권한 문서들 (2026-07-30)"]
 status: draft
 created: 2026-08-04
-updated: 2026-08-04
-notion_page_id: null
-notion_synced: null
+updated: 2026-08-15
+notion_page_id: "3bdfb969-b8be-819f-b4bb-e96ce60dd69a"
+notion_synced: "2026-08-15T22:55:00+0900"
 ---
 
 > [!tip] 핵심 Takeaway
@@ -43,4 +43,6 @@ notion_synced: null
 - [[operational-queries]] — 권한 감사(12)·권한 부여(13)의 실제 쿼리
 - [[postgresql-operations]] — PG 롤 설계와 계정 삭제 절차 상세
 - [[mysql-operations]] · [[sqlserver-operations]] — 엔진별 권한 운영 맥락
+- [[sqlserver-backup-procedure]] — `xp_cmdshell`을 켜지 않고 백업을 수행하도록 고친 사례. 운영 프로시저에 어디까지 권한을 요구할지의 판단 기준
+- [[mysql-dump-load]] — 덤프·로드 전용 계정 권한 목록. `WITH GRANT OPTION` 보유 계정이 이관 후 남는 것이 여기 break-glass 원칙의 대표 위반 경로
 - [[dev-tooling-standards]] — 자격증명을 env로 주입하는 개발 쪽 원칙

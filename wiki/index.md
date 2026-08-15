@@ -14,25 +14,28 @@ notion_synced: null
 > [!tip] 핵심 Takeaway
 > - **여기가 모든 탐색의 출발점이다.** 질문에 답할 때도, 자료를 넣을 때도 먼저 이 목차에서 관련 페이지를 찾는다 — 새 페이지를 만들기 전에 흡수할 곳이 있는지 확인하는 것이 원칙
 > - **폴더는 없다. 분류는 이 파일에만 존재한다.** 분류를 바꾸고 싶으면 파일을 옮기지 말고 이 목차를 고친다
-> - 현재 **29개 페이지 / 깨진 링크 0 / 고아 페이지 0**
+> - **페이지 수는 아래 한 줄에만 둔다.** 절 제목·Takeaway에 수치를 복제하지 않는다 — 적재할 때마다 여러 곳을 고쳐야 하고 하나만 놓쳐도 목차가 틀린다
 
 # Wiki Index
 
-*총 29개 페이지. 마지막 갱신: 2026-08-15*
+*총 32개 페이지(색인 2개 제외). 마지막 갱신: 2026-08-15*
 
 전체 운영 규칙은 저장소 루트의 `CLAUDE.md`. 작업 이력은 [[log]].
 
 ---
 
-## DB 운영 지식 (18)
+## DB 운영 지식
 
 재사용 가능한 기술 지식. 회사 맥락을 최소화해 이직 후에도 쓸 수 있는 형태로 유지한다.
 
 ### 엔진별 운영
 
-- [[mysql-operations]] — 백업 표준, Undo·장기 트랜잭션, 락, 버전 이정표. **회수 릴리스와 8.0.42 회귀가 업그레이드 하드 필터** ( #mysql #aurora #backup)
+- [[mysql-operations]] — 백업 도구 분기, Undo·장기 트랜잭션, 락, 버전 이정표. **회수 릴리스와 8.0.42 회귀가 업그레이드 하드 필터** ( #mysql #aurora #backup)
+- [[mysql-dump-load]] — mysqldump/MySQL Shell 논리 백업·이관 레퍼런스. **관리형 DB 대상 옵션 5종은 고정값, `--databases` 누락이 오적재 1순위.** 실기 검증 전 ( #mysql #backup #migration)
 - [[postgresql-operations]] — 계정·파라미터 베이스라인, CONCURRENTLY 원칙, XID wraparound 단계별 알람 ( #postgresql #vacuum #monitoring)
-- [[sqlserver-operations]] — VLF, Parameter Sniffing 대응 순서, AG vs FCI, 2019/2022/2025 비교 ( #sqlserver #performance #ha)
+- [[sqlserver-xevent-sessions]] — XEvent 세션 3종 정의. **데드락은 `system_health`가 이미 잡으므로 만들지 않고, 블로킹은 없으므로 필수.** 825는 severity 10이라 번호로 열거 ( #sqlserver #xevent #monitoring)
+- [[sqlserver-backup-procedure]] — `SP_DB_BACKUP` 결함 5건 수정본. **정리 조건에 DB 식별자가 없어 타 DB 백업을 지우던 것을 3중 한정으로 교정.** 실행 검증 전 ( #sqlserver #backup #retention)
+- [[sqlserver-operations]] — **신규 인스턴스 구축 표준**(Collation·TempDB·sp_configure·Trace flag), 에러로그 순환 Job, 백업 프로시저와 결함 5건, VLF, Parameter Sniffing, AG vs FCI ( #sqlserver #provisioning #backup #ha)
 - [[db-common-concepts]] — 3사 저장 단위·격리수준·MVCC·문법 비교표 + SQL 안티패턴 체크리스트 ( #comparison #sql)
 - [[mysql-partition-pruning-prepared-stmt-bug]] — Bug #119309. **증상 없음 ≠ 안전**. 영향 범위 판정 기준을 뒤집은 자체 규명 ( #mysql #bug #partitioning)
 - [[aurora-vs-mysql-replication-architecture]] — 독립 binlog apply와 공유 스토리지 redo apply의 성능·lag 차이 ( #aurora #replication)
@@ -48,7 +51,7 @@ notion_synced: null
 ### 보안·권한
 
 - [[db-access-control]] — Role 분리, break-glass, 엔진별 금지 권한, PG 계정 삭제 순서 ( #security #access-control)
-- [[db-security-review-patterns]] — 문서·스크립트 감사 체크리스트. **일상 절차에 섞인 보안 완화 단계를 먼저 찾는다** ( #security #checklist)
+- [[db-security-review-patterns]] — 문서·스크립트 감사 체크리스트. **일상 절차에 섞인 보안 완화 단계를 먼저 찾는다.** 백업 스크립트가 검토 1순위 ( #security #checklist)
 
 ### 개발·자동화
 
@@ -63,7 +66,7 @@ notion_synced: null
 
 ---
 
-## 업무 기록 (5)
+## 업무 기록
 
 언제·왜·내가 무엇을 했고 임팩트가 무엇인지. 성과 평가와 포트폴리오의 원천.
 
@@ -75,13 +78,13 @@ notion_synced: null
 
 ---
 
-## 개인 (1)
+## 개인
 
 - [[todo]] — 날짜 있는 단발성 일정과 할 일. **상대 날짜는 절대 날짜로 변환해 기록** ( #personal #schedule)
 
 ---
 
-## 참고자료 (3)
+## 참고자료
 
 외부 소스 하나를 정리한 페이지.
 
@@ -91,7 +94,7 @@ notion_synced: null
 
 ---
 
-## 종합·원칙 (2)
+## 종합·원칙
 
 여러 자료와 경험을 관통하는 판단 기준. 위키가 스스로 학습한 결론.
 
@@ -106,9 +109,16 @@ notion_synced: null
 
 - **[[notion-remediation-backlog]] P1 6건** — 실 서비스 스키마명이 박힌 TRUNCATE 생성기, QA RDS 실호스트명, 개인 이메일 노출. 미착수
 - **[[operational-queries]] 실행 검증** — 개발/QA 인스턴스 확인 후 현장 쿼리로 교체
+- **[[mysql-dump-load]] mysqldump 상한 수치** — 사내 판단 "수 GB 이하"와 원본 메모 "수십 GB"가 어긋난다 ^[ambiguous]. 보수적 값을 운영 기본으로 뒀으나, 크기가 아니라 **분 단위 RTO로 재정의**하는 것이 맞다
+- **Notion 전사 오류 전수 점검** — `\uXXXX` 이스케이프로 생긴 한글 깨짐이 2026-08-15에만 3개 페이지에서 10곳 발견됐다(`옷길`·`켰다 끓다`·`옷긴다` 등). 나머지 29개 페이지는 미점검. 위키 원문은 정상이므로 **해당 페이지를 전체 교체하면 일괄 해소**된다
+- **건강검진 항목 보강** — 현재 "모순" 점검이 페이지 **간** 수치만 본다. `sqlserver-operations`의 "결함 4건 / 위 5건" 처럼 **페이지 내부의 개수·참조 불일치**는 잡히지 않았다
+- **[[mysql-dump-load]] 증분 복구 배타 조건** — `dumpBinlogs`의 `since`는 `compatibility` 사용 덤프를 거부하는데, RDS/Aurora 대상은 `strip_definers`가 필수다. 관리형 DB에서 논리 덤프 기반 시점 복구가 성립하는지 미확인
 - **[[notion-llm-wiki-governance]] 역할 분담** — Notion 포털 vs 로컬 위키. 정하지 않으면 이중 관리가 계속된다
 - **[[db-security-review-patterns]] 재검증 주기** — "마지막 검증일 + N개월" 규칙 부재
 - **[[sqlserver-operations]] 2016 잔존 인스턴스** — 연장 지원 2026-07-15 종료
+- **[[sqlserver-backup-procedure]] 실행 검증** — 결함 5건 수정본 작성 완료, 개발/QA 미검증. **정리 단계 삭제 대상을 `SELECT`으로 확인한 뒤 운영 적용**. 원본은 그때까지 자동 스케줄 금지
+- **[[sqlserver-xevent-sessions]] 임계값·알람** — 3초/5초는 실측 근거 없음. 수집만 하고 알람 연동이 없어 [[monitoring-incident-runbook]]과 끊겨 있다
+- **[[sqlserver-operations]] Collation 적정성** — `Latin1_General_CI_AS_KS`가 한글 정렬에 맞는지 미확인
 - **[[dev-automation-detail]] Slack scope 축소** — 12개 중 3개 실사용 근거 미확인, 토큰 회전 절차 부재
 - **[[aurora-dsql]] 미확인 3건** — Firecracker 1:1, buffer pool 부재, v2 PG18. 세미나 발언만 존재
 - **[[aws-aidlc-workflows-v2-study]] Superpowers 비교** — 항목별 상세 비교 미완 → [[todo]]
