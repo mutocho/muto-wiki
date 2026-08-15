@@ -31,6 +31,8 @@ muto-wiki/
 ├── CLAUDE.md              이 파일 — 스키마 (실체)
 ├── AGENTS.md              → CLAUDE.md 심볼릭 링크 (Codex·기타 에이전트용)
 ├── scripts/sync.sh        git 동기화 (원격 우선)
+├── .claude/settings.json  Claude Code 훅 — 세션 시작 pull / 턴 종료 push
+├── .codex/hooks.json      Codex 훅 — 같은 동작
 ├── raw/                   원본 자료 — 사용자가 넣고, 에이전트는 읽기만
 │   └── archive/           위키 승격이 끝난 원본
 └── wiki/                  정리된 지식 — 에이전트가 작성·관리
@@ -308,7 +310,9 @@ bash scripts/sync.sh push   # 작업 종료 시
 ```
 
 - **Claude Code**: `.claude/settings.json` 훅이 자동 실행한다 (`SessionStart` → pull, `Stop` → push). 수동 실행 불필요
-- **Codex 등 다른 에이전트**: 훅이 없으므로 **직접 실행한다.**
+- **Codex**: `.codex/hooks.json` 훅이 같은 동작을 한다. 수동 실행 불필요.
+  Claude와 달리 `$CLAUDE_PROJECT_DIR`이 없으므로 `$(git rev-parse --show-toplevel)`로 repo root를 찾는다
+- **그 외 에이전트**: 훅이 없으므로 **직접 실행한다.**
   세션 시작 후 첫 작업 전에 `pull`, 위키 파일을 고친 뒤 `push`
 
 ### git 규칙
