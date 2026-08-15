@@ -8,7 +8,7 @@ status: draft
 created: 2026-08-04
 updated: 2026-08-15
 notion_page_id: "3bdfb969-b8be-819f-9e2a-dcec10111120"
-notion_synced: "2026-08-15T18:53:45+0900"
+notion_synced: "2026-08-15T22:55:00+0900"
 ---
 
 > [!tip] 핵심 Takeaway
