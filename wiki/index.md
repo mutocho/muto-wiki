@@ -109,6 +109,9 @@ notion_synced: null
 
 - **[[notion-remediation-backlog]] P1 6건** — 실 서비스 스키마명이 박힌 TRUNCATE 생성기, QA RDS 실호스트명, 개인 이메일 노출. 미착수
 - **[[operational-queries]] 실행 검증** — 개발/QA 인스턴스 확인 후 현장 쿼리로 교체
+- **[[mysql-dump-load]] mysqldump 상한 수치** — 사내 판단 "수 GB 이하"와 원본 메모 "수십 GB"가 어긋난다 ^[ambiguous]. 보수적 값을 운영 기본으로 뒀으나, 크기가 아니라 **분 단위 RTO로 재정의**하는 것이 맞다
+- **Notion 전사 오류 전수 점검** — `\uXXXX` 이스케이프로 생긴 한글 깨짐이 2026-08-15에만 3개 페이지에서 10곳 발견됐다(`옷길`·`켰다 끓다`·`옷긴다` 등). 나머지 29개 페이지는 미점검. 위키 원문은 정상이므로 **해당 페이지를 전체 교체하면 일괄 해소**된다
+- **건강검진 항목 보강** — 현재 "모순" 점검이 페이지 **간** 수치만 본다. `sqlserver-operations`의 "결함 4건 / 위 5건" 처럼 **페이지 내부의 개수·참조 불일치**는 잡히지 않았다
 - **[[mysql-dump-load]] 증분 복구 배타 조건** — `dumpBinlogs`의 `since`는 `compatibility` 사용 덤프를 거부하는데, RDS/Aurora 대상은 `strip_definers`가 필수다. 관리형 DB에서 논리 덤프 기반 시점 복구가 성립하는지 미확인
 - **[[notion-llm-wiki-governance]] 역할 분담** — Notion 포털 vs 로컬 위키. 정하지 않으면 이중 관리가 계속된다
 - **[[db-security-review-patterns]] 재검증 주기** — "마지막 검증일 + N개월" 규칙 부재

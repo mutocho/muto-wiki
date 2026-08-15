@@ -20,6 +20,7 @@ notion_synced: null
 
 ## 2026-08
 
+- [2026-08-15T23:35:00+09:00] FIX page="scripts/notion-convert.py" note="callout 안 순서 목록이 한 문단으로 뭉개지던 버그 수정. 원인 2가지 — ① 항목 판정이 문자열 '1.'만 검사해 2. 이후가 앞 항목에 병합 ② 빈 줄을 버려 뒤 문단까지 병합. 정규식 `^\\s*(?:[-*]\\s|\\d+\\.\\s)` + 빈 줄을 블록 경계로 처리. 회귀: 32개 전 페이지 변환 오류 0, Takeaway 불릿 수 불일치 0. 영향 페이지는 sqlserver-operations 1건뿐이며 Notion은 이미 수동 정리본이라 재동기화 불필요"
 - [2026-08-15T23:20:00+09:00] SYNC_NOTION pages=3 updated=3 note="미완 3건 마무리 — mysql-operations·sqlserver-operations·db-security-review-patterns를 replace_content로 전체 교체. 사전에 Notion 전용 절 유무를 절 제목 대조로 확인(3개 모두 없음). 부수 효과로 \\uXXXX 전사 오류 8곳 일괄 해소(켰다 끓다/켜다/꿔진다/짦은/없앱니다/옷긴다/컬테이너 등). 전체 Notion 지연 0건"
 - [2026-08-15T23:15:00+09:00] FIX page="sqlserver-operations" note="위키 내부 모순 발견·수정 — SP_DB_BACKUP 결함 callout 헤더가 '결함 4건'이고 항목도 4개인데 본문은 '위 5건을 고친'이라 참조. Notion과 sqlserver-backup-procedure에는 5번째(CHECKSUM이 COMPRESSION에 묶여 비압축 백업의 체크섬 검증까지 꺼짐)가 있었다. 전체 교체 전에 복원하지 않았으면 Notion에서 1건이 소실될 뻔했다"
 - [2026-08-15T23:00:00+09:00] SYNC_NOTION pages=15 created=1 updated=14 skipped=17 stamped=13 target="DBA" note="mysql-dump-load 신규 생성(db운영>MySQL) 후 참조 6개 페이지 재업로드로 백틱→mention-page 전환. 전문 재업로드 대신 update_content 검색-치환으로 변경 구간만 전송. 미완 3건은 의도적으로 notion_synced 미기록 — mysql-operations(summary·Takeaway·인용블록 미반영), sqlserver-operations(Takeaway 병합 미반영), db-security-review-patterns(Takeaway 병합 미반영). 원인: Notion 본문이 현 변환기 출력과 구조적으로 다름(최초 동기화가 축약본으로 올라감) → 다음 동기화에서 해당 절 전체 교체 필요"

@@ -150,13 +150,19 @@ def conv_callouts(lines):
             out.append(f"\t**{title}**")
         # 인용 내부의 이어붙은 줄을 원래 항목으로 되돌린다
         merged = []
+        blank_before = False
         for b in body:
             if b.strip() == "":
+                # 빈 줄은 블록 경계다. 버리면 뒤 문단이 앞 항목에 붙는다
+                blank_before = True
                 continue
-            if b.startswith(("- ", "1.", "* ")) or not merged:
+            # 순서 목록은 1. 뿐 아니라 2. 3. ... 전부 항목이다
+            is_item = bool(re.match(r"^\s*(?:[-*]\s|\d+\.\s)", b))
+            if is_item or blank_before or not merged:
                 merged.append(b)
             else:
                 merged[-1] = merged[-1].rstrip() + " " + b.strip()
+            blank_before = False
         for b in merged:
             out.append("\t" + b)
         out.append("</callout>")
