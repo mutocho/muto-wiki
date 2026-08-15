@@ -6,9 +6,9 @@ summary: Aurora 스토리지 내부 구조와 운영 특성, SQL Server→Azure 
 sources: ["Notion: 클라우드 및 플랫폼 트리 (2026-07-30)", "AWS 세미나 노트 2022~2023 (보관 대상)"]
 status: draft
 created: 2026-08-04
-updated: 2026-08-12
-notion_page_id: null
-notion_synced: null
+updated: 2026-08-15
+notion_page_id: "3bdfb969-b8be-81bd-b165-c9eedaa93e87"
+notion_synced: "2026-08-15T22:55:00+0900"
 ---
 
 > [!tip] 핵심 Takeaway
@@ -63,3 +63,4 @@ notion_synced: null
 - [[aurora-dsql]] — 같은 Aurora 이름을 쓰지만 운영 모델이 전혀 다른 분산 변종
 - [[monitoring-incident-runbook]] — 여기 정리된 Aurora 특성이 실제 장애 절차에서 쓰이는 곳
 - [[sqlserver-operations]] — Azure Blob 백업 절차를 실행하는 엔진 쪽 맥락
+- [[mysql-dump-load]] — 여기 정리한 Aurora 스토리지 특성이 Reader 덤프 제약·S3 직접 덤프로 나타나는 지점

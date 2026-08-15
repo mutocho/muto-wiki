@@ -7,8 +7,8 @@ sources: ["Notion: DB 공통 개념 인덱스 트리 (2026-07-30)"]
 status: draft
 created: 2026-08-04
 updated: 2026-08-04
-notion_page_id: null
-notion_synced: null
+notion_page_id: "3bdfb969-b8be-81df-907f-f5f32fd9914b"
+notion_synced: "2026-08-15T19:05:47+0900"
 ---
 
 > [!tip] 핵심 Takeaway
@@ -63,4 +63,5 @@ notion_synced: null
 
 - [[mysql-operations]] · [[postgresql-operations]] · [[sqlserver-operations]] — 이 비교표의 엔진별 상세
 - [[operational-queries]] — 같은 목적을 3사 문법으로 대조한 쿼리 모음
+- [[sqlserver-xevent-sessions]] — "느린 쿼리를 남긴다"는 같은 목적을 엔진별로 다르게 푸는 예: MySQL slow query log, PG `log_min_duration_statement`, SQL Server는 XEvent 세션
 - [[aurora-dsql]] — PG 호환이지만 격리수준이 Repeatable Read로 고정된 예외 사례
