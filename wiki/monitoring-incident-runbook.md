@@ -71,6 +71,7 @@ PI 활성화(보존 7일+) · Enhanced Monitoring 1~15초 · Slow/Error 로그 C
 
 - [[dba-ops-standards]] — 이 런북이 구체화하는 상위 대응 원칙
 - [[operational-queries]] — 각 단계에서 실행할 진단 쿼리
+- [[sqlserver-xevent-sessions]] — SQL Server의 사후 분석 근거를 남기는 수집 세션. **수집만 하고 알람은 없어**, 이 런북과 잇는 집계 Job이 미결 과제로 남아 있다
 - [[postgresql-operations]] — XID wraparound 알람 단계와 대응 상세
 - [[mysql-operations]] — 커넥션·복제 지연 관련 파라미터 근거
 - [[cloud-platform-knowledge]] — Aurora Backtrack·페일오버 특성
