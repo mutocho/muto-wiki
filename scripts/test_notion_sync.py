@@ -524,6 +524,8 @@ class TestRefreshTree(unittest.TestCase):
         self.assertIn("db운영", tree)
         self.assertIn("MySQL", tree)
         self.assertEqual(tree["MySQL"], "id-mysql")
+        # Assert save_tree was called with the final mapping including pagination results
+        self.assertEqual(saved, tree, "save_tree should have been called with the complete tree")
 
     def test_ignores_non_container_pages(self):
         def fake_api(method, path, token):
