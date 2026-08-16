@@ -1574,26 +1574,30 @@ python3 scripts/notion-sync.py --only aurora-dsql
 Expected: `[ok] aurora-dsql -> <id>`. Notion에서 **callout·표·코드블록·제목**이 제대로 렌더링되는지 확인한다.
 여기서 문제가 나오면 34개를 올리기 전에 잡는다 — 올린 뒤 발견하면 34개를 다시 손봐야 한다.
 
-**`properties.title` 형식 실패 시**: `HTTP 400`이 나면 `title_property()`를 평문 문자열
-(`{"title": title}`) 형태로 바꿔 재시도한다. 공식 문서가 두 형태 중 어느 쪽인지 명시하지 않아
-카나리에서 확정한다.
+**`properties.title` 형식 실패 시**: `HTTP 400`이 나면 `title_property()`를 순수 rich-text
+배열(`{"title": [{"text": {"content": title}}]}`) 형태로 바꿔 재시도한다. 공식 문서가 두 형태
+중 어느 쪽인지 명시하지 않아 카나리에서 확정한다.
 
 - [ ] **4. 나머지 전량**
 
 ```bash
 python3 scripts/notion-sync.py
 ```
-Expected: 34개 create, hold=0.
+Expected: `create=34 update=1 hold=0` — 3단계에서 올린 카나리(`aurora-dsql`)는 `notion_page_id`가
+생겼고 `updated`가 재구축 당일이라 §6.3의 `>=` 규칙으로 다시 대상이 된다. 즉 `action`이
+`update`가 되어 `--only` 없이 돌린 이 단계에서 대상은 나머지 34개(create) + 카나리 1개(update)다.
+
+**이 단계가 `fetch_markdown()`과 HOLD 검사가 처음 실제로 도는 지점이다 — 카나리 페이지 1건에서.**
+1~3단계는 전부 `create`라 `GET /markdown`을 부르지 않는다. 이 단계에서 유일한 `update` 대상인
+카나리를 처리할 때 처음으로 `fetch_markdown()`이 실행된다. 응답 본문 필드명을 문서가 명시하지
+않아 `markdown`·`content` 순으로 시도하도록 짰으니, 여기서 `본문 필드가 없다` 에러가 나면
+출력된 키 목록을 보고 `fetch_markdown()`을 고친다. 이건 문제가 아니라 API 불확실성이 34개가
+아니라 카나리 1개에서 먼저 드러나는 바람직한 결과다.
 
 - [ ] **5. 교차참조 2차 패스**
 
 1~4단계 중에는 아직 `notion_page_id`가 없는 페이지가 백틱으로 남는다. 전부 생성된 뒤
 한 번 더 올려야 mention 링크로 바뀐다. `updated`가 그대로면 §6.3이 건너뛰므로 `--only`로 명시한다.
-
-**이 단계가 `fetch_markdown()`과 HOLD 검사가 처음 실제로 도는 지점이다** — 1~4단계는 전부
-`create`라 `GET /markdown`을 부르지 않는다. 응답 본문 필드명을 문서가 명시하지 않아
-`markdown`·`content` 순으로 시도하도록 짰으니, 여기서 `본문 필드가 없다` 에러가 나면
-출력된 키 목록을 보고 `fetch_markdown()`을 고친다.
 
 ```bash
 python3 scripts/notion-sync.py --only $(ls wiki/*.md | xargs -n1 basename | sed 's/\.md$//' | grep -vE '^(index|log)$' | tr '\n' ' ')
@@ -1604,7 +1608,11 @@ python3 scripts/notion-sync.py --only $(ls wiki/*.md | xargs -n1 basename | sed 
 ```bash
 python3 scripts/notion-sync.py --dry-run
 ```
-Expected: `create=0 update=0 skip=35 hold=0` — 전부 최신이다.
+Expected: `create=0 hold=0`. `update`가 0이 아닐 수 있다 — 이게 정상이다. 35개 중 `updated:
+2026-08-16`인 페이지는 5단계에서 `notion_synced`가 같은 날짜로 찍혔으므로, §6.3의 `>=` 규칙상
+여전히 대상(`update`)이다. 재구축 당일 실행에서는 `updated`가 재구축일과 같은 페이지 수만큼
+`update`가 나오고 나머지가 `skip`이다 — 성공 신호는 `update`가 0인지가 아니라 `create=0
+hold=0`이다.
 
 Notion에서 임의의 페이지 2~3개를 열어 mention 링크가 클릭 가능한지 확인한다.
 

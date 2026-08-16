@@ -295,17 +295,26 @@ def title_property(title):
     """페이지 제목 property. 위키 frontmatter의 title을 그대로 쓴다.
 
     아이콘은 설정하지 않는다 — 위키 스키마에 대응 필드가 없다 (설계 §6.6).
+    HTTP 400이 나면 대안은 순수 rich-text 배열 {"title": [{"text": {"content": title}}]}이다
+    (평문 문자열 {"title": title}은 유효하지 않다) — 재구축 절차 3단계 참고.
     """
     return {"title": {"title": [{"type": "text", "text": {"content": title}}]}}
 
 
 def create_page(token, parent_id, title, md):
-    """신규 페이지 생성. 새 page_id를 반환한다."""
-    result = api("POST", "/pages", token, {
+    """신규 페이지 생성. 새 page_id를 반환한다.
+
+    md가 빈 문자열이면 markdown 필드 자체를 넣지 않는다 — 빈 필드를 API가
+    받아준다는 보장이 없고, 생략은 항상 안전하다. init_tree가 컨테이너를
+    빈 본문으로 만들 때 이 경로를 탄다.
+    """
+    body = {
         "parent": {"page_id": parent_id},
         "properties": title_property(title),
-        "markdown": md,
-    })
+    }
+    if md:
+        body["markdown"] = md
+    result = api("POST", "/pages", token, body)
     return result["id"]
 
 
@@ -545,10 +554,9 @@ def run(args):
             print(f"notion_page_id·notion_synced를 null로 되돌렸다: {count}개")
         return 0
 
-    plan = build_plan(only=args.only)
-    print_plan(plan)
-
     if args.dry_run:
+        plan = build_plan(only=args.only)
+        print_plan(plan)
         print("\n--dry-run: HTTP 호출 없음")
         return 0
 
@@ -561,11 +569,20 @@ def run(args):
     if args.init_tree:
         init_tree(token)
         print("컨테이너 트리 준비 완료")
+        stale = [slug for slug, fm in knowledge_pages().items()
+                 if fm.get("notion_page_id", "null") not in ("null", "")]
+        if stale:
+            print(f"경고: notion_page_id가 남아 있는 페이지 {len(stale)}개. "
+                  "삭제 후 재구축이라면 --reset-stamps를 먼저 실행할 것 "
+                  "(휴지통 페이지를 되살리게 된다)", file=sys.stderr)
         return 0
     if args.refresh_tree:
         refresh_tree(token)
         print("컨테이너 트리 재탐색 완료")
         return 0
+
+    plan = build_plan(only=args.only)
+    print_plan(plan)
 
     tree = load_tree()
     forced = set(args.force_replace or [])
@@ -580,6 +597,18 @@ def run(args):
         try:
             fm, md = convert_page(slug)
 
+            # 컨테이너가 없으면 create든 update든 어차피 HOLD다. update의 경우
+            # 이 검사를 fetch_markdown보다 먼저 해야 불필요한 GET 왕복을 피한다.
+            # action == "create"로 좁히지 않는다 — notion-tree.json이 없을 때
+            # 이 검사가 모든 update를 HOLD시켜 리셋 전 실행이 휴지통 페이지를
+            # PATCH하지 못하게 막는 안전망 역할도 겸한다 (§9-4).
+            parent_id = tree.get(item["parent"])
+            if parent_id is None:
+                print(f"[HOLD]   {slug}\n         └─ 컨테이너 '{item['parent']}' 없음. "
+                      "--init-tree 먼저 실행")
+                held += 1
+                continue
+
             if item["action"] == "update" and slug not in forced:
                 remote = fetch_markdown(token, item["page_id"])
                 extra = notion_only_sections(remote, md)
@@ -588,13 +617,6 @@ def run(args):
                           + ", ".join(extra))
                     held += 1
                     continue
-
-            parent_id = tree.get(item["parent"])
-            if parent_id is None:
-                print(f"[HOLD]   {slug}\n         └─ 컨테이너 '{item['parent']}' 없음. "
-                      "--init-tree 먼저 실행")
-                held += 1
-                continue
 
             if item["action"] == "create":
                 page_id = create_page(token, parent_id, fm["title"], md)
@@ -608,7 +630,8 @@ def run(args):
             if not status.startswith("OK"):
                 # 업로드는 됐지만 프론트매터에 기록하지 못했다 — 다음 실행이
                 # 같은 페이지를 또 만든다. 성공으로 세면 안 된다 (§6.3).
-                print(f"[FAIL]   {slug}: {status}", file=sys.stderr)
+                print(f"[FAIL]   {slug}: {status} (page_id={page_id} — 수동 스탬프 필요)",
+                      file=sys.stderr)
                 failed += 1
                 continue
 

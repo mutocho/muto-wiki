@@ -343,6 +343,33 @@ class TestUploadCalls(unittest.TestCase):
         self.assertEqual(seen["body"]["markdown"], "## 본문\n")
         self.assertNotIn("children", seen["body"])  # markdown과 상호 배타
 
+    def test_create_page_omits_markdown_field_when_body_is_empty(self):
+        # init_tree가 컨테이너를 만들 때 md=""를 넘긴다. 빈 문자열 필드를
+        # API가 받아준다는 보장이 없으므로 필드 자체를 생략해야 한다 —
+        # 생략된 optional 필드는 항상 안전하지만 빈 문자열은 그렇지 않다.
+        seen = {}
+
+        def fake_api(method, path, token, body=None, **kw):
+            seen.update(body=body)
+            return {"id": "container-id"}
+
+        with unittest.mock.patch.object(ns, "api", fake_api):
+            ns.create_page("tok", "parent-id", "컨테이너", "")
+        self.assertNotIn("markdown", seen["body"])
+        self.assertNotIn("children", seen["body"])
+
+    def test_create_page_includes_markdown_field_when_body_is_non_empty(self):
+        seen = {}
+
+        def fake_api(method, path, token, body=None, **kw):
+            seen.update(body=body)
+            return {"id": "page-id"}
+
+        with unittest.mock.patch.object(ns, "api", fake_api):
+            ns.create_page("tok", "parent-id", "제목", "## 본문\n")
+        self.assertIn("markdown", seen["body"])
+        self.assertEqual(seen["body"]["markdown"], "## 본문\n")
+
     def test_replace_page_uses_replace_content(self):
         seen = {}
 
@@ -412,6 +439,19 @@ class TestFetchMarkdown(unittest.TestCase):
         # 실패 메시지가 실제 응답 키를 드러내야 다음 사람이 필드명을 고칠 수 있다
         self.assertIn("id", str(cm.exception))
         self.assertIn("object", str(cm.exception))
+
+    def test_raises_api_error_when_field_is_not_a_string(self):
+        # Notion이 markdown을 중첩 객체로 돌려주면(예: {"markdown": {...}})
+        # isinstance 가드가 없으면 그대로 반환돼 section_titles()가 비-str에
+        # re.sub을 호출해 TypeError가 난다. TypeError는 run()의
+        # except (ApiError, KeyError, urllib.error.URLError)에 없어 루프
+        # 전체가 죽는다 — 이 응답 모양도 '필드 없음'과 같은 단일 페이지
+        # ApiError로 격하돼야 한다.
+        with unittest.mock.patch.object(
+                ns, "api", lambda *a, **kw: {"markdown": {"nested": "object"}}):
+            with self.assertRaises(ns.ApiError) as cm:
+                ns.fetch_markdown("tok", "abc")
+        self.assertIn("markdown", str(cm.exception))
 
 
 class TestTreeSpec(unittest.TestCase):
