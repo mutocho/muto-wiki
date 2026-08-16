@@ -8,8 +8,14 @@ wiki가 항상 진실이다. Notion에서 직접 편집한 내용은 회수하�
   python3 scripts/notion-sync.py --dry-run          계획만 출력 (HTTP 호출 0)
   python3 scripts/notion-sync.py --only <slug>...   지정 페이지만
 """
+import json
+import os
 import pathlib
 import re
+import subprocess
+import time
+import urllib.error
+import urllib.request
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 WIKI = ROOT / "wiki"
@@ -148,3 +154,84 @@ def placement(slug, fm, sections):
     if parent is None:
         raise HoldError(f"{slug}: 알 수 없는 절 '{section}'")
     return parent
+
+
+# --------------------------------------------------------------------------
+# 네트워크 경계
+# --------------------------------------------------------------------------
+
+NOTION_VERSION = "2026-03-11"
+API_ROOT = "https://api.notion.com/v1"
+DBA_PAGE_ID = "3aefb969b8be801280b8dc2ff35fbefb"
+
+
+class AuthError(Exception):
+    """토큰을 안전하게 얻을 수 없다."""
+
+
+class ApiError(Exception):
+    """Notion API 호출 실패."""
+
+
+def load_token(root=ROOT):
+    """NOTION_API_KEY. 환경변수 우선, 없으면 볼트 루트의 .env.
+
+    토큰 값은 어떤 출력에도 찍지 않는다.
+    """
+    from_env = os.environ.get("NOTION_API_KEY")
+    if from_env:
+        return from_env
+
+    path = root / ".env"
+    if not path.exists():
+        raise AuthError(
+            "NOTION_API_KEY가 없다. 환경변수로 주거나 볼트 루트에 .env를 만든다:\n"
+            "  printf 'NOTION_API_KEY=<토큰>\\n' > .env && chmod 600 .env")
+
+    tracked = subprocess.run(
+        ["git", "-C", str(root), "ls-files", "--error-unmatch", ".env"],
+        capture_output=True)
+    if tracked.returncode == 0:
+        raise AuthError(
+            "중단: .env가 git에 추적되고 있다. 토큰이 커밋될 수 있다.\n"
+            "  git rm --cached .env  후 재실행")
+
+    mode = path.stat().st_mode & 0o777
+    if mode != 0o600:
+        raise AuthError(f"중단: .env 퍼미션이 {oct(mode)}이다.\n  chmod 600 .env  후 재실행")
+
+    for line in path.read_text(encoding="utf-8").split("\n"):
+        key, _, value = line.partition("=")
+        if key.strip() == "NOTION_API_KEY":
+            return value.strip().strip('"').strip("'")
+    raise AuthError(".env에 NOTION_API_KEY가 없다")
+
+
+def api(method, path, token, body=None, retries=3, sleep=time.sleep):
+    """Notion API 호출. 429/5xx는 지수 백오프로 재시도, 4xx는 즉시 실패."""
+    data = None
+    if body is not None:
+        # ensure_ascii=False — 원시 UTF-8을 그대로 보낸다 (CLAUDE.md §6.4 ①)
+        data = json.dumps(body, ensure_ascii=False).encode("utf-8")
+
+    request = urllib.request.Request(API_ROOT + path, data=data, method=method)
+    request.add_header("Authorization", f"Bearer {token}")
+    request.add_header("Notion-Version", NOTION_VERSION)
+    request.add_header("Content-Type", "application/json")
+
+    delay = 1
+    for attempt in range(retries):
+        try:
+            with urllib.request.urlopen(request, timeout=60) as response:
+                raw = response.read().decode("utf-8")
+                return json.loads(raw) if raw else {}
+        except urllib.error.HTTPError as e:
+            retryable = e.code == 429 or e.code >= 500
+            if not retryable or attempt == retries - 1:
+                detail = ""
+                if e.fp is not None:
+                    detail = e.read().decode("utf-8", "replace")[:300]
+                raise ApiError(f"{method} {path} -> HTTP {e.code} {detail}") from None
+            sleep(delay)
+            delay *= 2
+    raise ApiError(f"{method} {path} -> 재시도 {retries}회 소진")
