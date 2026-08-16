@@ -8,6 +8,7 @@ wiki가 항상 진실이다. Notion에서 직접 편집한 내용은 회수하�
   python3 scripts/notion-sync.py --dry-run          계획만 출력 (HTTP 호출 0)
   python3 scripts/notion-sync.py --only <slug>...   지정 페이지만
 """
+import argparse
 import datetime
 import importlib.util
 import json
@@ -15,6 +16,7 @@ import os
 import pathlib
 import re
 import subprocess
+import sys
 import time
 import urllib.error
 import urllib.request
@@ -436,3 +438,189 @@ def refresh_tree(token):
     walk(DBA_PAGE_ID)
     save_tree(tree)
     return tree
+
+
+# --------------------------------------------------------------------------
+# 1회성 초기화
+# --------------------------------------------------------------------------
+
+def reset_stamps(wiki_dir=None):
+    """notion_page_id·notion_synced를 null로 되돌린다.
+
+    Notion에서 페이지를 삭제한 뒤 반드시 먼저 실행한다. 휴지통의 페이지는
+    여전히 유효한 id로 조회되므로, 리셋하지 않으면 휴지통 페이지를 되살린다.
+    """
+    directory = wiki_dir or WIKI
+    count = 0
+    for path in sorted(directory.glob("*.md")):
+        text = path.read_text(encoding="utf-8")
+        m = re.match(r"^---\n(.*?)\n---\n", text, re.S)
+        if not m:
+            continue
+        fm = m.group(1)
+        new_fm = re.sub(r"^notion_page_id:.*$", "notion_page_id: null", fm, flags=re.M)
+        new_fm = re.sub(r"^notion_synced:.*$", "notion_synced: null", new_fm, flags=re.M)
+        if new_fm == fm:
+            continue
+        path.write_text(f"---\n{new_fm}\n---\n" + text[m.end():], encoding="utf-8")
+        count += 1
+    return count
+
+
+# --------------------------------------------------------------------------
+# 계획
+# --------------------------------------------------------------------------
+
+def build_plan(only=None):
+    """무엇을 어떻게 할지 먼저 전부 정한다. HTTP 호출은 하지 않는다."""
+    sections = index_sections()
+    pages = knowledge_pages()
+    slugs = sorted(only) if only else sorted(pages)
+
+    plan = []
+    for slug in slugs:
+        fm = pages.get(slug)
+        if fm is None:
+            plan.append({"slug": slug, "action": "hold", "parent": None,
+                         "page_id": None, "reason": "wiki에 없는 페이지"})
+            continue
+
+        page_id = fm.get("notion_page_id", "null")
+        page_id = None if page_id in ("null", "") else page_id
+
+        if only is None and not is_target(fm):
+            plan.append({"slug": slug, "action": "skip", "parent": None,
+                         "page_id": page_id, "reason": "updated <= notion_synced"})
+            continue
+
+        try:
+            parent = placement(slug, fm, sections)
+        except HoldError as e:
+            plan.append({"slug": slug, "action": "hold", "parent": None,
+                         "page_id": page_id, "reason": str(e)})
+            continue
+
+        plan.append({
+            "slug": slug,
+            "action": "update" if page_id else "create",
+            "parent": parent,
+            "page_id": page_id,
+            "reason": "",
+        })
+    return plan
+
+
+def print_plan(plan):
+    counts = {"create": 0, "update": 0, "skip": 0, "hold": 0}
+    for item in plan:
+        counts[item["action"]] += 1
+    for item in plan:
+        if item["action"] == "skip":
+            continue
+        if item["action"] == "hold":
+            print(f"[HOLD]   {item['slug']}\n         └─ {item['reason']}")
+        else:
+            print(f"[{item['action']}] {item['slug']} -> {item['parent']}")
+    print(f"\n계획: create={counts['create']} update={counts['update']} "
+          f"skip={counts['skip']} hold={counts['hold']}")
+    return counts
+
+
+# --------------------------------------------------------------------------
+# 실행
+# --------------------------------------------------------------------------
+
+def run(args):
+    if args.reset_stamps:
+        count = reset_stamps()
+        print(f"notion_page_id·notion_synced를 null로 되돌렸다: {count}개")
+        return 0
+
+    plan = build_plan(only=args.only)
+    print_plan(plan)
+
+    if args.dry_run:
+        print("\n--dry-run: HTTP 호출 없음")
+        return 0
+
+    try:
+        token = load_token()
+    except AuthError as e:
+        print(f"\n{e}", file=sys.stderr)
+        return 2
+
+    if args.init_tree:
+        init_tree(token)
+        print("컨테이너 트리 준비 완료")
+        return 0
+    if args.refresh_tree:
+        refresh_tree(token)
+        print("컨테이너 트리 재탐색 완료")
+        return 0
+
+    tree = load_tree()
+    forced = set(args.force_replace or [])
+    created = updated = held = 0
+    skipped = sum(1 for item in plan if item["action"] == "skip")
+    held += sum(1 for item in plan if item["action"] == "hold")
+
+    for item in plan:
+        if item["action"] in ("skip", "hold"):
+            continue
+        slug = item["slug"]
+        try:
+            fm, md = convert_page(slug)
+
+            if item["action"] == "update" and slug not in forced:
+                remote = fetch_markdown(token, item["page_id"])
+                extra = notion_only_sections(remote, md)
+                if extra:
+                    print(f"[HOLD]   {slug}\n         └─ Notion 전용 절 {len(extra)}개: "
+                          + ", ".join(extra))
+                    held += 1
+                    continue
+
+            parent_id = tree.get(item["parent"])
+            if parent_id is None:
+                print(f"[HOLD]   {slug}\n         └─ 컨테이너 '{item['parent']}' 없음. "
+                      "--init-tree 먼저 실행")
+                held += 1
+                continue
+
+            if item["action"] == "create":
+                page_id = create_page(token, parent_id, fm["title"], md)
+                created += 1
+            else:
+                page_id = item["page_id"]
+                replace_page(token, page_id, md)
+                updated += 1
+
+            # 성공 즉시 페이지 단위로 기록한다. 마지막에 몰아 쓰면 중간 실패 시
+            # 어디까지 올렸는지 알 수 없어 다음 실행이 전량 재업로드가 된다 (§6.3).
+            stamp_mod.stamp(slug, page_id, now_iso())
+            print(f"[ok]     {slug} -> {page_id}")
+
+        except (ApiError, KeyError, urllib.error.URLError) as e:
+            print(f"[FAIL]   {slug}: {e}", file=sys.stderr)
+
+    write_log(created=created, updated=updated, skipped=skipped, held=held)
+    print(f"\n완료: created={created} updated={updated} skipped={skipped} held={held}")
+    return 0
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description="wiki/ -> Notion 단방향 동기화")
+    parser.add_argument("--dry-run", action="store_true", help="계획만 출력, HTTP 호출 0")
+    parser.add_argument("--only", nargs="+", metavar="SLUG",
+                        help="지정 페이지만 (강제 재업로드는 사용자가 페이지를 명시한다)")
+    parser.add_argument("--force-replace", nargs="+", metavar="SLUG",
+                        help="HOLD를 무시하고 덮어쓴다")
+    parser.add_argument("--init-tree", action="store_true", help="컨테이너 생성 (1회성)")
+    parser.add_argument("--refresh-tree", action="store_true", help="컨테이너 id 재탐색")
+    parser.add_argument("--reset-stamps", action="store_true",
+                        help="notion_page_id·notion_synced를 null로 (1회성)")
+    return run(parser.parse_args(argv))
+
+
+if __name__ == "__main__":
+    sys.exit(main())
