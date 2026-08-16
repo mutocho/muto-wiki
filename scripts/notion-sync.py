@@ -8,6 +8,7 @@ wiki가 항상 진실이다. Notion에서 직접 편집한 내용은 회수하�
   python3 scripts/notion-sync.py --dry-run          계획만 출력 (HTTP 호출 0)
   python3 scripts/notion-sync.py --only <slug>...   지정 페이지만
 """
+import datetime
 import importlib.util
 import json
 import os
@@ -282,3 +283,71 @@ def notion_only_sections(remote_md, local_md):
     """
     local = set(section_titles(local_md))
     return [t for t in section_titles(remote_md) if t not in local]
+
+
+# --------------------------------------------------------------------------
+# 업로드
+# --------------------------------------------------------------------------
+
+def title_property(title):
+    """페이지 제목 property. 위키 frontmatter의 title을 그대로 쓴다.
+
+    아이콘은 설정하지 않는다 — 위키 스키마에 대응 필드가 없다 (설계 §6.6).
+    """
+    return {"title": {"title": [{"type": "text", "text": {"content": title}}]}}
+
+
+def create_page(token, parent_id, title, md):
+    """신규 페이지 생성. 새 page_id를 반환한다."""
+    result = api("POST", "/pages", token, {
+        "parent": {"page_id": parent_id},
+        "properties": title_property(title),
+        "markdown": md,
+    })
+    return result["id"]
+
+
+def replace_page(token, page_id, md):
+    """기존 페이지 본문 전체 교체. wiki가 진실이다."""
+    api("PATCH", f"/pages/{page_id}/markdown", token, {
+        "type": "replace_content",
+        "replace_content": {"new_str": md},
+    })
+
+
+def fetch_markdown(token, page_id):
+    """현재 Notion 본문을 마크다운으로 받는다. HOLD 검사용.
+
+    응답 필드명이 공식 문서에 명시돼 있지 않다. 'markdown'과 'content' 둘 다
+    받아보고, 어느 쪽도 없으면 응답 키를 그대로 드러내 실패시킨다 —
+    조용히 빈 문자열을 반환하면 HOLD 검사가 항상 통과해 검사 자체가 무력해진다.
+    """
+    result = api("GET", f"/pages/{page_id}/markdown", token)
+    for field in ("markdown", "content"):
+        if field in result:
+            return result[field]
+    raise ApiError(
+        f"GET /pages/{page_id}/markdown 응답에 본문 필드가 없다. 키: {sorted(result)}")
+
+
+# --------------------------------------------------------------------------
+# 로그 (§7)
+# --------------------------------------------------------------------------
+
+def now_iso():
+    """2026-08-16T17:40:00+09:00 — log.md 형식."""
+    stamp = datetime.datetime.now().astimezone().strftime("%Y-%m-%dT%H:%M:%S%z")
+    return stamp[:-2] + ":" + stamp[-2:]
+
+
+def write_log(created, updated, skipped, held, log_path=None):
+    """wiki/log.md 맨 위에 SYNC_NOTION 한 줄을 넣는다. 최신이 위."""
+    path = log_path or (WIKI / "log.md")
+    text = path.read_text(encoding="utf-8")
+    line = (f"- [{now_iso()}] SYNC_NOTION pages={created + updated} "
+            f"created={created} updated={updated} skipped={skipped} held={held} "
+            f'target="DBA"')
+    marker = "# Wiki Log\n"
+    index = text.index(marker) + len(marker)
+    path.write_text(text[:index] + "\n" + line + "\n" + text[index:].lstrip("\n"),
+                    encoding="utf-8")

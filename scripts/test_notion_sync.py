@@ -316,5 +316,69 @@ class TestConvertPage(unittest.TestCase):
         self.assertNotIn("[[", md)          # wikilink가 전부 처리됨
 
 
+class TestTitleProperty(unittest.TestCase):
+    def test_rich_text_shape(self):
+        self.assertEqual(
+            ns.title_property("제목"),
+            {"title": {"title": [{"type": "text", "text": {"content": "제목"}}]}})
+
+
+class TestUploadCalls(unittest.TestCase):
+    def test_create_page_posts_markdown_field(self):
+        seen = {}
+
+        def fake_api(method, path, token, body=None, **kw):
+            seen.update(method=method, path=path, body=body)
+            return {"id": "new-page-id"}
+
+        with unittest.mock.patch.object(ns, "api", fake_api):
+            page_id = ns.create_page("tok", "parent-id", "제목", "## 본문\n")
+        self.assertEqual(page_id, "new-page-id")
+        self.assertEqual(seen["method"], "POST")
+        self.assertEqual(seen["path"], "/pages")
+        self.assertEqual(seen["body"]["parent"], {"page_id": "parent-id"})
+        self.assertEqual(seen["body"]["markdown"], "## 본문\n")
+        self.assertNotIn("children", seen["body"])  # markdown과 상호 배타
+
+    def test_replace_page_uses_replace_content(self):
+        seen = {}
+
+        def fake_api(method, path, token, body=None, **kw):
+            seen.update(method=method, path=path, body=body)
+            return {}
+
+        with unittest.mock.patch.object(ns, "api", fake_api):
+            ns.replace_page("tok", "abc", "## 새 본문\n")
+        self.assertEqual(seen["method"], "PATCH")
+        self.assertEqual(seen["path"], "/pages/abc/markdown")
+        self.assertEqual(seen["body"]["type"], "replace_content")
+        self.assertEqual(seen["body"]["replace_content"]["new_str"], "## 새 본문\n")
+
+
+class TestNowIso(unittest.TestCase):
+    def test_offset_has_colon(self):
+        # log.md는 +09:00 형태를 쓴다
+        value = ns.now_iso()
+        self.assertRegex(value, r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$")
+
+
+class TestWriteLog(unittest.TestCase):
+    def test_inserts_line_at_top_of_entries(self):
+        import tempfile, shutil
+        with tempfile.TemporaryDirectory() as d:
+            log = pathlib.Path(d) / "log.md"
+            log.write_text(
+                "---\ntitle: Wiki Log\n---\n\n# Wiki Log\n\n- [2026-08-15T10:00:00+09:00] LINT issues=0\n",
+                encoding="utf-8")
+            ns.write_log(created=2, updated=3, skipped=30, held=1, log_path=log)
+            lines = [l for l in log.read_text(encoding="utf-8").split("\n") if l.startswith("- [")]
+            self.assertIn("SYNC_NOTION", lines[0])
+            self.assertIn("pages=5", lines[0])       # created + updated
+            self.assertIn("created=2", lines[0])
+            self.assertIn("skipped=30", lines[0])
+            self.assertIn("held=1", lines[0])
+            self.assertIn("LINT", lines[1])          # 기존 항목이 아래로 밀림
+
+
 if __name__ == "__main__":
     unittest.main()
