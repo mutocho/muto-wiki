@@ -1628,10 +1628,13 @@ Notion에서 임의의 페이지 2~3개를 열어 mention 링크가 클릭 가�
 
 ```bash
 git add wiki/ scripts/notion-tree.json
-git commit -m "chore: Notion 재구축 — 컨테이너 16개, 페이지 35개
+git commit -m "chore: Notion 재구축 — 컨테이너와 전 페이지 재생성
 
 Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>"
 ```
+
+실제 개수는 6단계 `--dry-run` 출력과 `log.md`의 `SYNC_NOTION` 줄에 이미 남으므로
+커밋 메시지에 옮겨 적지 않는다 — 두 곳이 갈라지면 어느 쪽이 맞는지 알 수 없게 된다.
 
 ---
 
