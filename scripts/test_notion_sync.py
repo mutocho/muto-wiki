@@ -528,7 +528,10 @@ class TestRefreshTree(unittest.TestCase):
         self.assertEqual(saved, tree, "save_tree should have been called with the complete tree")
 
     def test_ignores_non_container_pages(self):
+        paths_called = []
+
         def fake_api(method, path, token):
+            paths_called.append(path)
             # Only DBA has children; non-container and container children return empty
             if path == "/blocks/3aefb969b8be801280b8dc2ff35fbefb/children?page_size=100":
                 return {
@@ -547,6 +550,9 @@ class TestRefreshTree(unittest.TestCase):
 
         self.assertIn("db운영", tree)
         self.assertNotIn("Other Page", tree)
+        # Non-container pages should not be recursed into
+        self.assertNotIn("/blocks/id-other/children", "".join(paths_called),
+                        "Should not have recursed into non-container page id-other")
 
     def test_recursive_descent(self):
         # walk() is called recursively on child containers.
