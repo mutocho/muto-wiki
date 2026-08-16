@@ -70,7 +70,7 @@ GRANT CONNECT ON DATABASE svcdb TO svcapp;
 GRANT USAGE ON SCHEMA svc TO app_rw, app_ro;
 ```
 
-실제 Role 생성·현재 객체 권한·기본 권한·검증 명령은 [[operational-queries]]의 권한 부여 절차를 사용하고, 3사 공통 분리 원칙은 [[db-access-control]]을 따른다.
+실제 Role 생성·현재 객체 권한·기본 권한·검증 명령은 [[db-permission-queries]]의 권한 부여 절차를 사용하고, 3사 공통 분리 원칙은 [[db-access-control]]을 따른다.
 
 ## 확장 모듈 관리
 
@@ -151,7 +151,9 @@ ORDER BY extname;
 ## Related
 
 - [[db-common-concepts]] — 3사 비교 관점에서의 PG 위치
-- [[operational-queries]] — 진단·권한·DDL/DML 쿼리
+- [[operational-queries]] — 진단 쿼리 (읽기 전용)
+- [[db-change-safe-patterns]] — `CONCURRENTLY` 인덱스, `lock_timeout` 가드, `NOT VALID` 2단계 제약, 청크 DELETE의 실행 골격
+- [[db-permission-queries]] — `ALTER DEFAULT PRIVILEGES`·`search_path` 등록·계정 삭제 순서의 실제 명령
 - [[db-access-control]] — 3-엔진 공통 계정 설계 표준
 - [[monitoring-incident-runbook]] — wraparound 경보 대응 절차
 - [[aurora-dsql]] — PG 호환이지만 VACUUM·파라미터 개념이 없는 분산 변종

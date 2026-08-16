@@ -12,7 +12,7 @@ sources:
   - "Microsoft Learn: Database instant file initialization"
 status: draft
 created: 2026-08-04
-updated: 2026-08-15
+updated: 2026-08-16
 notion_page_id: "3bdfb969-b8be-8188-ac85-c84964c845d7"
 notion_synced: "2026-08-15T23:20:00+0900"
 ---
@@ -234,6 +234,8 @@ DB명·경로·백업 타입(F/L/D)·보관일수·압축 여부를 받아 백�
 
 - [[db-common-concepts]] — 3사 비교 관점에서의 SQL Server 위치
 - [[operational-queries]] — 대기 통계·블로킹 등 진단 쿼리
+- [[db-change-safe-patterns]] — 인덱스 `ONLINE`·`RESUMABLE` 재구성, 청크 DELETE, `MERGE` 대신 `UPDLOCK`+`HOLDLOCK` UPSERT의 실행 골격
+- [[db-permission-queries]] — 사용자 정의 Role 부여와 `sa` 비활성화, 버전별 모니터링 권한명의 실제 명령
 - [[db-access-control]] — 고정 롤 대신 사용자 정의 Role을 쓰는 근거
 - [[cloud-platform-knowledge]] — Azure Blob 백업 절차와 TDE 주의사항
 - [[db-security-review-patterns]] — 인덱스 리빌드·Database Mail 위험 패턴

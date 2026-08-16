@@ -8,7 +8,7 @@ sources:
   - "사내 SQL Server 구축 표준 메모 검토 (2026-08-15) — SP_DB_BACKUP·TRUSTWORTHY"
 status: reviewed
 created: 2026-08-04
-updated: 2026-08-15
+updated: 2026-08-16
 notion_page_id: "3bdfb969-b8be-8149-b60c-c66dd89d11cb"
 notion_synced: "2026-08-15T23:20:00+0900"
 ---
@@ -67,6 +67,8 @@ notion_synced: "2026-08-15T23:20:00+0900"
 - [[cloud-platform-knowledge]] — 백업 절차에 TDE 해제가 혼입된 원 사례
 - [[notion-kb-consolidation-worklog]] — 이 체크리스트가 만들어진 프로젝트
 - [[dev-tooling-standards]] — 코드·CI 쪽 자격증명 관리 기준
-- [[operational-queries]] — 변경 명령(13~15)이 이 검토의 대상
+- [[db-change-safe-patterns]] — DDL·DML 변경 명령이 이 검토의 1차 대상. 조각화율 단독 판단 REBUILD·`TRUNCATE` 생성기를 배제한 근거가 여기 체크리스트다
+- [[db-permission-queries]] — 권한 부여 명령. 자리표시자 비밀번호·과다 권한을 여기서 걸러낸다
+- [[operational-queries]] — 읽기 전용 진단 쿼리. 검토 등급이 가장 낮은 대신, 해시 컬럼 조회 혼입만 확인한다
 - [[sqlserver-operations]] — 인덱스 리빌드·Database Mail 위험의 엔진 맥락
 - [[mysql-dump-load]] — MySQL 쪽의 같은 유형. `--add-drop-*`와 `--databases` 누락이 파괴적 단계가 일상 절차에 섞인 사례

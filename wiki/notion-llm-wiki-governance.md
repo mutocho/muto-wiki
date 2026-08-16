@@ -6,7 +6,7 @@ summary: Notion 'Muto - DBA 통합 포털'의 운영 지침·정리 원칙을 �
 sources: ["Notion: Muto - DBA 통합 포털 > LLM Wiki 운영 지침 (2026-07-30)", "Notion: 정리 원칙 및 검토 기준 (2026-07-30)"]
 status: draft
 created: 2026-08-04
-updated: 2026-08-04
+updated: 2026-08-16
 notion_page_id: "3bdfb969-b8be-8185-8baf-dec840e5d814"
 notion_synced: "2026-08-15T18:53:45+0900"
 ---
@@ -15,7 +15,7 @@ notion_synced: "2026-08-15T18:53:45+0900"
 > - **미결 과제 1순위: Notion 포털과 이 로컬 위키의 역할 분담.** 둘 다 "DBA 지식 정제"를 하고 있어 이중 관리와 드리프트가 발생한다. 제안 — **Notion = 팀 공유용 검증 완료 지식, 로컬 위키 = 개인 초안·작업 로그·커리어 기록** ^[inferred]
 > - **한 주제 = 한 대표 문서.** 색인과 본문에 같은 내용을 복사하지 않는다. 이 위키에서 [[index]]가 목차만 갖고 본문을 갖지 않는 이유와 같은 원칙
 > - **충돌은 삭제 사유가 아니다.** 버전 차이 / 환경 차이 / 실제 사실 충돌을 구분하고 양쪽 근거를 남긴다 — [[verbal-source-verification-policy]]와 짝을 이루는 규칙
-> - **실행 명령에는 항상 DBMS·버전·배포 형태·트랜잭션 영향·롤백을 명시한다.** 이것이 [[operational-queries]]의 작성 기준
+> - **실행 명령에는 항상 DBMS·버전·배포 형태·트랜잭션 영향·롤백을 명시한다.** 이것이 [[db-change-safe-patterns]]의 작성 기준이며, 조회 전용인 [[operational-queries]]와 페이지를 나눈 이유이기도 하다
 > - PostgreSQL OSS / RDS / Aurora처럼 이름이 비슷한 제품은 반드시 환경별로 분리 기술한다
 
 # Notion DBA 포털 운영 거버넌스

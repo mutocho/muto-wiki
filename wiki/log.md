@@ -18,6 +18,8 @@ notion_synced: null
 
 # Wiki Log
 
+- [2026-08-16T16:40:00+09:00] MIGRATE page="operational-queries" pages_created=2 pages_updated=14 note="허브 페이지 3분할 — INGEST 소요 시간 진단의 1순위 조치. 원인: 인바운드 17개 최다 허브가 45.4KB(위키 전체의 12%)라 DB 관련 적재마다 Edit 전 전량 Read가 걸렸다. 실측 근거는 커밋 3ba8ec2 — 손댄 6개 파일 101.6KB를 읽고 기존 페이지 실변경은 32줄(신규 143줄 제외), 읽기의 90%가 낭비. 분할선은 페이지가 스스로 '가장 중요한 구조'로 선언한 읽기전용/변경 경계 + 권한 주제축. 결과: operational-queries 45.4→23.2KB(-49%, 진단 1~11만), db-permission-queries 15.5KB(감사+부여), db-change-safe-patterns 15.4KB(DDL+DML). 절 번호를 페이지별로 재부여했고 '7번/9번/12번 섹션' 상호참조 4곳을 페이지 링크로 교정. 인바운드 재배선 12개 페이지(권한 3건→db-permission-queries, 변경 2건→db-change-safe-patterns, 별칭 노후 2건). 총량은 45.4→54.1KB(+8.7)로 늘었다 — 페이지당 frontmatter·Takeaway·Related·경계 설명이 3벌이 된 비용이며, 적재당 읽기량 감소와 맞바꾼 것. 검증: 깨진 링크 0 / 고아 0 / 단방향 0(index 제외) / Takeaway 3개 모두 6줄 이하 / frontmatter 필수 필드 결손 0. **미완: Notion에는 15절짜리 구본이 그대로 남아 다음 동기화 전까지 위키와 어긋난다**"
+
 - [2026-08-16T00:02:00+09:00] INGEST source="Codex attachment: pasted PostgreSQL 오브젝트 메모" pages_created=1 pages_updated=3 mode=append note="오브젝트 소유권·DDL·복사·인덱스·파티션·뷰·시퀀스 런북 분리, current_user/session_user·char·pg_repack 무잠금 표현 교정"
 
 - [2026-08-15T21:45:34+09:00] INGEST source="Codex attachment: pasted PostgreSQL 운영 메모" pages_created=0 pages_updated=2 mode=append note="접속·SCRAM 인증·스키마·확장 모듈·오픈 게이트 병합, MD5/trust·광역 HBA 예시 교정"

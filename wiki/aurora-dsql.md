@@ -11,7 +11,7 @@ sources:
 category: db운영
 status: verified
 created: 2026-08-04
-updated: 2026-08-15
+updated: 2026-08-16
 notion_page_id: "3bdfb969-b8be-8125-a96b-cabce44b6c55"
 notion_synced: "2026-08-15T22:55:00+0900"
 ---
@@ -147,3 +147,4 @@ notion_synced: "2026-08-15T22:55:00+0900"
 - [[postgresql-operations|PostgreSQL 운영 지식]]
 - [[db-common-concepts|DBMS 공통 개념·3사 비교]]
 - [[operational-queries]] — PG 계열 진단 쿼리 (DSQL 미지원 항목 주의)
+- [[db-change-safe-patterns]] — PG의 락 가드 기반 DDL/DML 절차. DSQL은 OCC라 이 전제가 성립하지 않는다는 점이 대조 포인트
