@@ -401,5 +401,43 @@ class TestFetchMarkdown(unittest.TestCase):
         self.assertIn("object", str(cm.exception))
 
 
+class TestTreeSpec(unittest.TestCase):
+    def test_covers_all_container_names(self):
+        named = {name for name, _ in ns.TREE_SPEC}
+        self.assertEqual(named, set(ns.CONTAINER_NAMES))
+
+    def test_parent_appears_before_child(self):
+        seen = {"DBA"}
+        for name, parent in ns.TREE_SPEC:
+            self.assertIn(parent, seen, f"{name}의 부모 {parent}가 아직 만들어지지 않았다")
+            seen.add(name)
+
+    def test_has_16_containers(self):
+        self.assertEqual(len(ns.TREE_SPEC), 16)
+
+
+class TestInitTree(unittest.TestCase):
+    def test_creates_only_missing_containers(self):
+        created = []
+
+        def fake_create(token, parent_id, title, md):
+            created.append((title, parent_id))
+            return f"id-{title}"
+
+        existing = {"DBA": ns.DBA_PAGE_ID, "db운영": "id-db운영"}
+        with unittest.mock.patch.object(ns, "create_page", fake_create):
+            with unittest.mock.patch.object(ns, "load_tree", lambda: dict(existing)):
+                with unittest.mock.patch.object(ns, "save_tree", lambda t: None):
+                    tree = ns.init_tree("tok")
+
+        names = [title for title, _ in created]
+        self.assertNotIn("db운영", names)          # 이미 있으므로 만들지 않는다
+        self.assertIn("MySQL", names)
+        self.assertEqual(len(created), 15)          # 16 - 이미 있는 db운영
+        self.assertEqual(tree["MySQL"], "id-MySQL")
+        # 자식은 방금 만든 부모의 id 아래로 간다
+        self.assertIn(("엔진 비교", "id-엔진 공통"), created)
+
+
 if __name__ == "__main__":
     unittest.main()
