@@ -4,15 +4,7 @@ category: db운영
 tags: [postgresql, ddl, index, partitioning, schema]
 summary: 테이블 소유권과 SET ROLE, 타입·복사 방식, 트랜잭션 DDL, 온라인 인덱스·파티션, 뷰와 시퀀스의 운영 안전 기준.
 sources: ["사용자 제공 PostgreSQL 오브젝트 메모 (2026-08-16)", "PostgreSQL 공식 문서: CREATE TABLE·CREATE VIEW·CREATE INDEX·Table Partitioning·CREATE SEQUENCE (2026-08-16 대조)"]
-status: draft
-base_confidence: 0.78
-provenance:
-  extracted: 0.91
-  inferred: 0.07
-  ambiguous: 0.02
-lifecycle: draft
-lifecycle_changed: 2026-08-16
-tier: supporting
+status: reviewed
 created: 2026-08-16
 updated: 2026-08-16
 notion_page_id: null
