@@ -89,5 +89,92 @@ class TestKnowledgePages(unittest.TestCase):
         self.assertEqual(len(ns.knowledge_pages()), 35)
 
 
+class TestRouteEngine(unittest.TestCase):
+    def test_dsql_wins_over_aurora(self):
+        # aurora-dsql은 tags에 aurora와 dsql이 함께 있다. dsql이 이겨야 한다.
+        self.assertEqual(
+            ns.route_engine(["dba", "aws", "aurora", "dsql", "architecture"]),
+            "Aurora DSQL")
+
+    def test_three_engine_tags_is_comparison(self):
+        # db-common-concepts — 3사 대조 페이지
+        self.assertEqual(
+            ns.route_engine(["dba", "sql", "comparison", "mysql", "postgresql", "sqlserver"]),
+            "엔진 비교")
+
+    def test_single_engine_tag(self):
+        self.assertEqual(ns.route_engine(["dba", "mysql", "backup"]), "MySQL")
+        self.assertEqual(ns.route_engine(["dba", "postgresql", "vacuum"]), "PostgreSQL")
+        self.assertEqual(ns.route_engine(["dba", "sqlserver", "ha"]), "SQL Server")
+
+    def test_aurora_alone_is_not_a_routing_key(self):
+        # cloud-platform-knowledge — aurora 태그가 있지만 엔진 태그가 없다.
+        # aurora를 키로 쓰면 MySQL로 오배치된다.
+        self.assertEqual(
+            ns.route_engine(["dba", "aws", "aurora", "docker", "azure", "linux"]),
+            "엔진 비교")
+
+    def test_aurora_mysql_page_goes_to_mysql(self):
+        # aurora-vs-mysql-replication-architecture — mysql 태그가 원 엔진을 표현한다
+        self.assertEqual(
+            ns.route_engine(["dba", "mysql", "aurora", "replication", "performance"]),
+            "MySQL")
+
+
+class TestIndexSections(unittest.TestCase):
+    def setUp(self):
+        self.sections = ns.index_sections()
+
+    def test_engine_section_has_12_pages(self):
+        engine = [s for s, sec in self.sections.items() if sec == ns.ENGINE_SECTION]
+        self.assertEqual(len(engine), 12)
+
+    def test_ignores_open_tasks_section(self):
+        # '미완 과제' 절은 17개 링크를 갖고 있다. 여기서 잡히면 대부분이 오배치된다.
+        # notion-remediation-backlog는 '지식 운영' 절 소속이면서 '미완 과제'에도 링크된다 —
+        # 둘 중 분류 절이 이겨야 한다.
+        self.assertEqual(self.sections.get("notion-remediation-backlog"), "지식 운영")
+        for sec in self.sections.values():
+            self.assertNotIn("미완 과제", sec)
+
+    def test_every_knowledge_page_is_classified(self):
+        missing = sorted(set(ns.knowledge_pages()) - set(self.sections))
+        self.assertEqual(missing, [], f"분류 절에 없는 페이지: {missing}")
+
+
+class TestPlacement(unittest.TestCase):
+    def test_all_35_pages_resolve(self):
+        sections = ns.index_sections()
+        pages = ns.knowledge_pages()
+        for slug, fm in pages.items():
+            with self.subTest(slug=slug):
+                parent = ns.placement(slug, fm, sections)
+                self.assertIn(parent, ns.CONTAINER_NAMES)
+
+    def test_known_placements(self):
+        sections = ns.index_sections()
+        pages = ns.knowledge_pages()
+        expected = {
+            "aurora-dsql": "Aurora DSQL",
+            "cloud-platform-knowledge": "엔진 비교",
+            "db-common-concepts": "엔진 비교",
+            "mysql-operations": "MySQL",
+            "postgresql-operations": "PostgreSQL",
+            "sqlserver-operations": "SQL Server",
+            "operational-queries": "진단·운영 표준",
+            "db-access-control": "보안·권한",
+            "worklog-kakaogames-2026": "kakaogames",
+            "todo": "개인",
+            "verbal-source-verification-policy": "종합원칙",
+        }
+        for slug, want in expected.items():
+            with self.subTest(slug=slug):
+                self.assertEqual(ns.placement(slug, pages[slug], sections), want)
+
+    def test_unknown_page_raises_hold(self):
+        with self.assertRaises(ns.HoldError):
+            ns.placement("존재하지-않는-페이지", {"tags": "[]"}, ns.index_sections())
+
+
 if __name__ == "__main__":
     unittest.main()
