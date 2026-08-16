@@ -7,8 +7,8 @@ sources: ["Notion: 클라우드 및 플랫폼 트리 (2026-07-30)", "AWS 세미�
 status: draft
 created: 2026-08-04
 updated: 2026-08-15
-notion_page_id: null
-notion_synced: null
+notion_page_id: "3befb969-b8be-81df-95e3-d1b0569dfcda"
+notion_synced: "2026-08-16T20:19:58+09:00"
 ---
 
 > [!tip] 핵심 Takeaway

@@ -7,8 +7,8 @@ sources: [대화 기록 (2026-08-06), 대화 기록 (2026-08-15)]
 status: reviewed
 created: 2026-08-06
 updated: 2026-08-15
-notion_page_id: null
-notion_synced: null
+notion_page_id: "3befb969-b8be-81cd-8173-cd1fbb163678"
+notion_synced: "2026-08-16T20:20:20+09:00"
 ---
 
 > [!tip] 핵심 Takeaway

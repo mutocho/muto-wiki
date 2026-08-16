@@ -7,8 +7,8 @@ sources: ["Notion: 현재 작업 상태 (2026-07-30)", "Notion: 정리 및 보�
 status: draft
 created: 2026-08-04
 updated: 2026-08-04
-notion_page_id: null
-notion_synced: null
+notion_page_id: "3befb969-b8be-8171-92bc-cf8caf80975f"
+notion_synced: "2026-08-16T20:20:12+09:00"
 ---
 
 > [!tip] 핵심 Takeaway

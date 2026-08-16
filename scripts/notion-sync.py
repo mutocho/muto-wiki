@@ -273,8 +273,23 @@ def convert_page(slug):
 
 def section_titles(md):
     """^##+ 절 제목. 코드블록 안은 세지 않는다 — SQL의 #은 MySQL 주석이다."""
-    masked, _ = convert_mod.mask_code(md)
+    masked, _ = convert_mod.mask_fences(md)
     return [m.group(1).strip() for m in re.finditer(r"^#{2,}\s+(.*)$", masked, re.M)]
+
+
+def normalize_title(t):
+    """Notion 마크다운 왕복에서 생긴 표기 차이를 걷어낸다.
+
+    GET /markdown이 돌려주는 제목은 우리가 보낸 것과 글자 그대로 같지 않다.
+    Notion이 두 가지를 덧붙인다:
+      - 백슬래시 이스케이프 — `5.7.44~8.4.9` → `5.7.44\\~8.4.9` (~는 취소선 문법)
+      - 자동 링크화 — `CLAUDE.md` → `[CLAUDE.md](http://CLAUDE.md)` (.md를 TLD로 오인)
+    정규화 없이 비교하면 이런 제목을 가진 페이지가 **영구 HOLD**가 된다.
+    2026-08-16 재구축 2차 패스에서 4개 페이지가 이렇게 막혔다.
+    """
+    t = re.sub(r"\[([^\]]*)\]\([^)]*\)", r"\1", t)
+    t = re.sub(r"\\([\\`*_{}\[\]()#+\-.!~|])", r"\1", t)
+    return t.strip()
 
 
 def notion_only_sections(remote_md, local_md):
@@ -282,9 +297,13 @@ def notion_only_sections(remote_md, local_md):
 
     비어 있지 않으면 업로드하지 않는다. wiki로 옮겨 적고 재실행하거나
     --force-replace로 폐기하는 것은 사람이 정한다.
+
+    보고는 원격 원문 그대로 하고, 비교만 정규화한다 — 사람이 볼 때는
+    Notion에 실제로 뭐라고 적혀 있는지가 필요하다.
     """
-    local = set(section_titles(local_md))
-    return [t for t in section_titles(remote_md) if t not in local]
+    local = {normalize_title(t) for t in section_titles(local_md)}
+    return [t for t in section_titles(remote_md)
+            if normalize_title(t) not in local]
 
 
 # --------------------------------------------------------------------------

@@ -7,8 +7,8 @@ sources: ["Notion: 운영 및 모니터링 트리 (2026-07-30)"]
 status: draft
 created: 2026-08-04
 updated: 2026-08-15
-notion_page_id: null
-notion_synced: null
+notion_page_id: "3befb969-b8be-81f1-bab3-d2292b5c31af"
+notion_synced: "2026-08-16T20:20:08+09:00"
 ---
 
 > [!tip] 핵심 Takeaway
