@@ -321,7 +321,9 @@ class TestIndexSections(unittest.TestCase):
 
     def test_ignores_open_tasks_section(self):
         # '미완 과제' 절은 17개 링크를 갖고 있다. 여기서 잡히면 대부분이 오배치된다.
-        self.assertEqual(self.sections.get("notion-remediation-backlog"), "개발·자동화")
+        # notion-remediation-backlog는 '지식 운영' 절 소속이면서 '미완 과제'에도 링크된다 —
+        # 둘 중 분류 절이 이겨야 한다.
+        self.assertEqual(self.sections.get("notion-remediation-backlog"), "지식 운영")
         for sec in self.sections.values():
             self.assertNotIn("미완 과제", sec)
 
