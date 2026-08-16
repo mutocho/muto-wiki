@@ -4,12 +4,7 @@ category: db운영
 tags: [dba, postgresql, monitoring, architecture, vacuum]
 summary: 접속·SCRAM 인증, 계정/권한·스키마 표준, 확장 모듈, 파라미터, 오브젝트 운영, XID wraparound와 알람 기준을 다룬 PostgreSQL 운영 런북.
 sources: ["Notion: PostgreSQL 지식 인덱스 트리 (2026-07-30)", "도서 노트: PostgreSQL DBA를 위한 Admin 이야기", "사용자 제공 PostgreSQL 운영 메모 (2026-08-15)", "사용자 제공 PostgreSQL 오브젝트 메모 (2026-08-16)", "PostgreSQL 공식 문서: Password Authentication·Schemas·Predefined Roles·CREATE TABLE·CREATE VIEW·CREATE INDEX (2026-08-16 대조)"]
-status: draft
-base_confidence: 0.78
-provenance:
-  extracted: 0.88
-  inferred: 0.10
-  ambiguous: 0.02
+status: reviewed
 created: 2026-08-04
 updated: 2026-08-16
 notion_page_id: "3bdfb969-b8be-8115-9fd5-f522b3c532a8"

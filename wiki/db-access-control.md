@@ -4,12 +4,7 @@ category: db운영
 tags: [dba, security, access-control, mysql, postgresql, sqlserver]
 summary: MySQL/PostgreSQL/SQL Server 공통 계정 설계 원칙 — Role/로그인 분리, 배포자 Role, 모니터링 전용 계정, break-glass, 엔진별 금지 권한.
 sources: ["Notion: DB 운영 쿼리 인덱스 하위 권한 문서들 (2026-07-30)", "사용자 제공 PostgreSQL 운영 메모 (2026-08-15)", "사용자 제공 PostgreSQL 오브젝트 메모 (2026-08-16)", "PostgreSQL 공식 문서: Password Authentication·Schemas·System Information Functions (2026-08-16 대조)"]
-status: draft
-base_confidence: 0.78
-provenance:
-  extracted: 0.92
-  inferred: 0.06
-  ambiguous: 0.02
+status: reviewed
 created: 2026-08-04
 updated: 2026-08-16
 notion_page_id: "3bdfb969-b8be-819f-b4bb-e96ce60dd69a"
