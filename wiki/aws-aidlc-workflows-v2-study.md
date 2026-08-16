@@ -8,8 +8,8 @@ source_url: "https://github.com/awslabs/aidlc-workflows"
 status: draft
 created: 2026-08-12
 updated: 2026-08-12
-notion_page_id: "3bdfb969-b8be-813f-b36b-fd658c2280f5"
-notion_synced: "2026-08-15T19:24:51+0900"
+notion_page_id: null
+notion_synced: null
 ---
 
 > [!tip] 핵심 Takeaway
