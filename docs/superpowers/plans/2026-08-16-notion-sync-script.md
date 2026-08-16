@@ -1583,16 +1583,24 @@ Expected: `[ok] aurora-dsql -> <id>`. Notion에서 **callout·표·코드블록�
 ```bash
 python3 scripts/notion-sync.py
 ```
-Expected: `create=34 update=1 hold=0` — 3단계에서 올린 카나리(`aurora-dsql`)는 `notion_page_id`가
-생겼고 `updated`가 재구축 당일이라 §6.3의 `>=` 규칙으로 다시 대상이 된다. 즉 `action`이
-`update`가 되어 `--only` 없이 돌린 이 단계에서 대상은 나머지 34개(create) + 카나리 1개(update)다.
+성공 신호는 **`hold=0`이고 `create`가 카나리를 뺀 나머지 전부**라는 것이다. 고정 숫자로 적지
+않는다 — 1단계에서 `notion_synced`를 `null`로 만든 페이지는 날짜와 무관하게 전부 대상이 되지만,
+**카나리가 `update`로 잡힐지 `skip`으로 잡힐지는 실행 날짜에 달렸다.**
 
-**이 단계가 `fetch_markdown()`과 HOLD 검사가 처음 실제로 도는 지점이다 — 카나리 페이지 1건에서.**
-1~3단계는 전부 `create`라 `GET /markdown`을 부르지 않는다. 이 단계에서 유일한 `update` 대상인
-카나리를 처리할 때 처음으로 `fetch_markdown()`이 실행된다. 응답 본문 필드명을 문서가 명시하지
-않아 `markdown`·`content` 순으로 시도하도록 짰으니, 여기서 `본문 필드가 없다` 에러가 나면
-출력된 키 목록을 보고 `fetch_markdown()`을 고친다. 이건 문제가 아니라 API 불확실성이 34개가
-아니라 카나리 1개에서 먼저 드러나는 바람직한 결과다.
+- 카나리의 `updated`와 **같은 날** 재구축하면 → §6.3의 `>=` 규칙으로 다시 대상이 되어 `update=1`
+- **하루라도 지난 뒤** 재구축하면 → `updated < notion_synced`라 `skip=1`
+
+둘 다 정상이다. `hold`가 0이 아니거나 `create`가 예상보다 적으면 그때 원인을 본다.
+
+**`fetch_markdown()`과 HOLD 검사가 처음 실제로 도는 지점은 카나리가 `update`로 잡히는 경우다.**
+1~3단계는 전부 `create`라 `GET /markdown`을 부르지 않는다. 응답 본문 필드명을 문서가 명시하지
+않아 `markdown`·`content` 순으로 시도하도록 짰으니, `본문 필드가 없다` 에러가 나면 출력된 키
+목록을 보고 `fetch_markdown()`을 고친다. 이건 문제가 아니라 API 불확실성이 전량이 아니라
+**카나리 1건에서 먼저** 드러나는 바람직한 결과다.
+
+> 카나리가 `skip`으로 잡히는 날짜에 재구축한다면 이 조기 노출이 일어나지 않고, `fetch_markdown()`은
+> 5단계 2차 패스에서 전 페이지에 대해 한꺼번에 처음 실행된다. 그게 싫으면 4단계 전에
+> `--only <카나리>`를 한 번 더 돌려 `update` 경로를 의도적으로 태운다.
 
 - [ ] **5. 교차참조 2차 패스**
 
