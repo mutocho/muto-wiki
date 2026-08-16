@@ -4,7 +4,7 @@ category: db운영
 tags: [dba, mysql, aurora, backup, troubleshooting, version]
 summary: mysqldump/MySQL Shell 백업 도구 분기 기준(실행 상세는 mysql-dump-load), Undo·장기 트랜잭션, 락, 임시테이블 5.7→8.0, 버전별 이정표(회수 릴리스 포함), 모니터링 판단 기준.
 sources: ["Notion: MySQL 지식 인덱스 트리 (2026-07-30)", MySQL 8.0/8.4 공식 릴리스 노트]
-status: draft
+status: reviewed
 created: 2026-08-04
 updated: 2026-08-16
 notion_page_id: "3bdfb969-b8be-817b-afeb-e275a155aa5f"
