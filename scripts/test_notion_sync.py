@@ -632,5 +632,103 @@ class TestRefreshTree(unittest.TestCase):
         self.assertIn("db운영", tree)
 
 
+class TestResetStamps(unittest.TestCase):
+    def test_nulls_both_fields(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            wiki = pathlib.Path(d)
+            (wiki / "a.md").write_text(
+                '---\ncategory: db운영\nnotion_page_id: "abc"\n'
+                'notion_synced: "2026-08-15T22:55:00+0900"\n---\n\n본문\n',
+                encoding="utf-8")
+            count = ns.reset_stamps(wiki_dir=wiki)
+            text = (wiki / "a.md").read_text(encoding="utf-8")
+        self.assertEqual(count, 1)
+        self.assertIn("notion_page_id: null", text)
+        self.assertIn("notion_synced: null", text)
+
+
+class TestBuildPlan(unittest.TestCase):
+    def test_skips_up_to_date_pages(self):
+        plan = ns.build_plan()
+        actions = {item["slug"]: item["action"] for item in plan}
+        self.assertEqual(len(plan), 35)
+        self.assertIn(actions["aurora-dsql"], ("create", "update", "skip"))
+
+    def test_only_filters_to_named_slugs(self):
+        plan = ns.build_plan(only=["aurora-dsql"])
+        self.assertEqual([item["slug"] for item in plan], ["aurora-dsql"])
+
+    def test_plan_items_carry_parent(self):
+        plan = ns.build_plan(only=["aurora-dsql"])
+        self.assertEqual(plan[0]["parent"], "Aurora DSQL")
+
+    def test_index_sections_called_once(self):
+        """index_sections()는 wiki/index.md를 매번 재파싱하므로 슬러그마다
+        부르면 35번 호출된다. build_plan은 루프 진입 전 한 번만 불러야 한다."""
+        calls = []
+        real_index_sections = ns.index_sections
+
+        def counting():
+            calls.append(1)
+            return real_index_sections()
+
+        with unittest.mock.patch.object(ns, "index_sections", counting):
+            ns.build_plan()
+
+        self.assertEqual(len(calls), 1)
+
+
+class TestDryRunMakesNoHttpCalls(unittest.TestCase):
+    def test_dry_run_does_not_touch_network(self):
+        def explode(*a, **kw):
+            raise AssertionError("dry-run에서 HTTP를 호출했다")
+
+        with unittest.mock.patch.object(ns.urllib.request, "urlopen", explode):
+            with unittest.mock.patch.object(ns, "load_token", lambda root=None: "tok"):
+                code = ns.main(["--dry-run"])
+        self.assertEqual(code, 0)
+
+
+class TestRunSurvivesUrlError(unittest.TestCase):
+    def test_url_error_on_one_page_does_not_abort_run(self):
+        """spec §6.5: 페이지 단위 독립 — 한 건 실패가 나머지를 막지 않는다.
+        api()는 HTTPError만 감싸므로 DNS 실패 등 순수 URLError가 나면
+        run() 루프가 이를 잡아 다음 페이지로 계속 진행해야 한다."""
+        import argparse
+        import urllib.error
+
+        plan = [
+            {"slug": "page-a", "action": "create", "parent": "MySQL",
+             "page_id": None, "reason": ""},
+            {"slug": "page-b", "action": "create", "parent": "MySQL",
+             "page_id": None, "reason": ""},
+        ]
+
+        calls = []
+
+        def fake_convert_page(slug):
+            calls.append(slug)
+            if slug == "page-a":
+                raise urllib.error.URLError("network unreachable")
+            return {"title": "Page B"}, "본문"
+
+        args = argparse.Namespace(
+            reset_stamps=False, only=None, dry_run=False,
+            force_replace=None, init_tree=False, refresh_tree=False)
+
+        with unittest.mock.patch.object(ns, "build_plan", lambda only=None: plan), \
+             unittest.mock.patch.object(ns, "load_token", lambda: "tok"), \
+             unittest.mock.patch.object(ns, "load_tree", lambda: {"MySQL": "parent-id"}), \
+             unittest.mock.patch.object(ns, "convert_page", fake_convert_page), \
+             unittest.mock.patch.object(ns, "create_page", lambda *a, **kw: "new-page-id"), \
+             unittest.mock.patch.object(ns.stamp_mod, "stamp", lambda *a, **kw: None), \
+             unittest.mock.patch.object(ns, "write_log", lambda **kw: None):
+            code = ns.run(args)
+
+        self.assertEqual(code, 0)
+        self.assertEqual(calls, ["page-a", "page-b"])
+
+
 if __name__ == "__main__":
     unittest.main()
