@@ -7,8 +7,8 @@ sources: [대화 기록 (2026-08-06), 위키 내 대조 사례 5건]
 status: reviewed
 created: 2026-08-06
 updated: 2026-08-16
-notion_page_id: "3bdfb969-b8be-8109-b328-c00f2a44cd07"
-notion_synced: "2026-08-15T22:55:00+0900"
+notion_page_id: null
+notion_synced: null
 ---
 
 > [!tip] 핵심 Takeaway

@@ -8,8 +8,8 @@ sources: [사내 공유 (2026-08-12), "AWS: RDS MySQL read replicas / Aurora sto
 status: draft
 created: 2026-08-12
 updated: 2026-08-15
-notion_page_id: "3bdfb969-b8be-81de-9add-cd5a42ba9b05"
-notion_synced: "2026-08-15T22:55:00+0900"
+notion_page_id: null
+notion_synced: null
 ---
 
 > [!tip] 핵심 Takeaway

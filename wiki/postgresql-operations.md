@@ -7,8 +7,8 @@ sources: ["Notion: PostgreSQL 지식 인덱스 트리 (2026-07-30)", "도서 노
 status: reviewed
 created: 2026-08-04
 updated: 2026-08-16
-notion_page_id: "3bdfb969-b8be-8115-9fd5-f522b3c532a8"
-notion_synced: "2026-08-15T22:55:00+0900"
+notion_page_id: null
+notion_synced: null
 ---
 
 > [!tip] 핵심 Takeaway

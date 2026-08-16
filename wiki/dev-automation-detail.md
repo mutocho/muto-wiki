@@ -7,8 +7,8 @@ sources: ["Notion: 개발 및 자동화 트리 (2026-07-30)"]
 status: draft
 created: 2026-08-04
 updated: 2026-08-04
-notion_page_id: "3bdfb969-b8be-81e6-9bf5-efff03e961db"
-notion_synced: "2026-08-15T18:53:45+0900"
+notion_page_id: null
+notion_synced: null
 ---
 
 > [!tip] 핵심 Takeaway

@@ -10,8 +10,8 @@ sources:
 status: draft
 created: 2026-08-15
 updated: 2026-08-15
-notion_page_id: "3bdfb969-b8be-8194-ab94-d13e8a394022"
-notion_synced: "2026-08-15T22:30:00+0900"
+notion_page_id: null
+notion_synced: null
 ---
 
 > [!tip] 핵심 Takeaway

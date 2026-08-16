@@ -7,8 +7,8 @@ sources: [대화 기록 (2026-08-06)]
 status: draft
 created: 2026-08-06
 updated: 2026-08-06
-notion_page_id: "3bdfb969-b8be-816b-b060-e72ede17b6e2"
-notion_synced: "2026-08-15T18:53:45+0900"
+notion_page_id: null
+notion_synced: null
 ---
 
 > [!tip] 핵심 Takeaway

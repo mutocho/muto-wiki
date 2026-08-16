@@ -7,8 +7,8 @@ category: db운영
 status: draft
 created: 2026-08-04
 updated: 2026-08-16
-notion_page_id: "3bdfb969-b8be-81a6-b74a-f9e3ec136313"
-notion_synced: "2026-08-15T19:48:09+0900"
+notion_page_id: null
+notion_synced: null
 ---
 
 > [!tip] 핵심 Takeaway
