@@ -8,7 +8,7 @@ status: draft
 created: 2026-08-04
 updated: 2026-08-16
 notion_page_id: "3befb969-b8be-816e-80d3-f93b4ac8a0be"
-notion_synced: "2026-08-16T20:20:12+09:00"
+notion_synced: "2026-08-16T20:25:11+09:00"
 ---
 
 > [!tip] 핵심 Takeaway
@@ -51,3 +51,4 @@ notion_synced: "2026-08-16T20:20:12+09:00"
 - [[dba-ops-standards]] — 문서 생명주기 기준을 운영 표준에 적용한 쪽
 - [[notion-kb-consolidation-worklog]] — 이 거버넌스를 설계한 프로젝트 기록
 - [[vault-governance-decisions]] — 로컬 위키 쪽 거버넌스 결정
+- [[obsidian-wiki-tooling-gotchas]] — 위키를 Notion으로 미러링하는 변환기의 실측 함정. 포털에 올라간 내용이 원문과 어긋나 보이면 내용이 아니라 **변환 단계**를 먼저 의심한다
