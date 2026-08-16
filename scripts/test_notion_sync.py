@@ -6,6 +6,7 @@
 import importlib.util
 import pathlib
 import unittest
+import unittest.mock
 
 SCRIPTS = pathlib.Path(__file__).resolve().parent
 
@@ -174,6 +175,99 @@ class TestPlacement(unittest.TestCase):
     def test_unknown_page_raises_hold(self):
         with self.assertRaises(ns.HoldError):
             ns.placement("존재하지-않는-페이지", {"tags": "[]"}, ns.index_sections())
+
+
+class TestLoadToken(unittest.TestCase):
+    def setUp(self):
+        import tempfile, os
+        self._d = tempfile.TemporaryDirectory()
+        self.root = pathlib.Path(self._d.name)
+        self._saved = os.environ.pop("NOTION_API_KEY", None)
+
+    def tearDown(self):
+        import os
+        if self._saved is not None:
+            os.environ["NOTION_API_KEY"] = self._saved
+        self._d.cleanup()
+
+    def _write_env(self, text, mode=0o600):
+        p = self.root / ".env"
+        p.write_text(text, encoding="utf-8")
+        p.chmod(mode)
+        return p
+
+    def test_env_var_wins(self):
+        import os
+        os.environ["NOTION_API_KEY"] = "from-env-var"
+        self._write_env("NOTION_API_KEY=from-file\n")
+        self.assertEqual(ns.load_token(self.root), "from-env-var")
+
+    def test_reads_dotenv(self):
+        self._write_env('NOTION_API_KEY="ntn_secret"\n')
+        self.assertEqual(ns.load_token(self.root), "ntn_secret")
+
+    def test_rejects_loose_permissions(self):
+        self._write_env("NOTION_API_KEY=x\n", mode=0o644)
+        with self.assertRaises(ns.AuthError) as cm:
+            ns.load_token(self.root)
+        self.assertIn("퍼미션", str(cm.exception))
+
+    def test_missing_key_raises(self):
+        self._write_env("OTHER=1\n")
+        with self.assertRaises(ns.AuthError):
+            ns.load_token(self.root)
+
+    def test_no_env_file_raises(self):
+        with self.assertRaises(ns.AuthError):
+            ns.load_token(self.root)
+
+
+class TestApiRetry(unittest.TestCase):
+    def test_retries_on_429_then_succeeds(self):
+        import io, json, urllib.error
+        calls = []
+
+        def fake_urlopen(req, timeout=None):
+            calls.append(req)
+            if len(calls) < 3:
+                raise urllib.error.HTTPError(req.full_url, 429, "rate limited", {}, None)
+            return io.BytesIO(json.dumps({"id": "ok"}).encode("utf-8"))
+
+        slept = []
+        with unittest.mock.patch.object(ns.urllib.request, "urlopen", fake_urlopen):
+            out = ns.api("GET", "/pages/x", "tok", sleep=slept.append)
+        self.assertEqual(out, {"id": "ok"})
+        self.assertEqual(len(calls), 3)
+        self.assertEqual(slept, [1, 2])  # 지수 백오프
+
+    def test_does_not_retry_on_400(self):
+        import io
+        import urllib.error
+        calls = []
+
+        def fake_urlopen(req, timeout=None):
+            calls.append(req)
+            raise urllib.error.HTTPError(
+                req.full_url, 400, "bad", {}, io.BytesIO(b'{"message":"nope"}'))
+
+        with unittest.mock.patch.object(ns.urllib.request, "urlopen", fake_urlopen):
+            with self.assertRaises(ns.ApiError):
+                ns.api("POST", "/pages", "tok", {"a": 1}, sleep=lambda s: None)
+        self.assertEqual(len(calls), 1)
+
+    def test_body_is_raw_utf8_not_escaped(self):
+        import io, json
+        seen = {}
+
+        def fake_urlopen(req, timeout=None):
+            seen["data"] = req.data
+            return io.BytesIO(json.dumps({}).encode("utf-8"))
+
+        with unittest.mock.patch.object(ns.urllib.request, "urlopen", fake_urlopen):
+            ns.api("POST", "/pages", "tok", {"markdown": "한글"}, sleep=lambda s: None)
+        # ensure_ascii=False — \uXXXX 이스케이프는 문자 수를 2.24배로 부풀린다
+        self.assertIn("한글".encode("utf-8"), seen["data"])
+        self.assertNotIn(b"\\u", seen["data"])
 
 
 if __name__ == "__main__":
