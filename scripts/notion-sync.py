@@ -326,7 +326,7 @@ def fetch_markdown(token, page_id):
     """
     result = api("GET", f"/pages/{page_id}/markdown", token)
     for field in ("markdown", "content"):
-        if field in result:
+        if field in result and isinstance(result[field], str):
             return result[field]
     raise ApiError(
         f"GET /pages/{page_id}/markdown 응답에 본문 필드가 없다. 키: {sorted(result)}")
