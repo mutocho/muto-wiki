@@ -8,6 +8,7 @@ wiki가 항상 진실이다. Notion에서 직접 편집한 내용은 회수하�
   python3 scripts/notion-sync.py --dry-run          계획만 출력 (HTTP 호출 0)
   python3 scripts/notion-sync.py --only <slug>...   지정 페이지만
 """
+import importlib.util
 import json
 import os
 import pathlib
@@ -235,3 +236,49 @@ def api(method, path, token, body=None, retries=3, sleep=time.sleep):
             sleep(delay)
             delay *= 2
     raise ApiError(f"{method} {path} -> 재시도 {retries}회 소진")
+
+
+# --------------------------------------------------------------------------
+# 변환기·스탬프 재사용 (하이픈 파일명이라 importlib로 로드한다)
+# --------------------------------------------------------------------------
+
+def _load_module(name, filename):
+    spec = importlib.util.spec_from_file_location(name, SCRIPTS / filename)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+convert_mod = _load_module("notion_convert", "notion-convert.py")
+stamp_mod = _load_module("notion_stamp", "notion-stamp.py")
+
+
+def convert_page(slug):
+    """(frontmatter, Notion 마크다운).
+
+    notion-convert.py는 import 시점에 PAGE_IDS를 한 번 읽는다. 한 실행에서 여러
+    페이지를 새로 만들면 뒤 페이지가 앞 페이지를 mention으로 걸 수 없으므로
+    매 변환 직전에 갱신한다.
+    """
+    convert_mod.PAGE_IDS.update(convert_mod.load_page_ids())
+    return convert_mod.convert(WIKI / f"{slug}.md")
+
+
+# --------------------------------------------------------------------------
+# HOLD 검사 (§6.2 대체)
+# --------------------------------------------------------------------------
+
+def section_titles(md):
+    """^##+ 절 제목. 코드블록 안은 세지 않는다 — SQL의 #은 MySQL 주석이다."""
+    masked, _ = convert_mod.mask_code(md)
+    return [m.group(1).strip() for m in re.finditer(r"^#{2,}\s+(.*)$", masked, re.M)]
+
+
+def notion_only_sections(remote_md, local_md):
+    """Notion에만 있고 위키에는 없는 절 제목.
+
+    비어 있지 않으면 업로드하지 않는다. wiki로 옮겨 적고 재실행하거나
+    --force-replace로 폐기하는 것은 사람이 정한다.
+    """
+    local = set(section_titles(local_md))
+    return [t for t in section_titles(remote_md) if t not in local]

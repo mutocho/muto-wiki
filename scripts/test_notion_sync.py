@@ -279,5 +279,42 @@ class TestApiRetry(unittest.TestCase):
         self.assertNotIn(b"\\u", seen["data"])
 
 
+class TestSectionTitles(unittest.TestCase):
+    def test_extracts_h2_and_deeper(self):
+        md = "# 제목\n본문\n## 첫 절\n내용\n### 하위\n## 둘째 절\n"
+        self.assertEqual(ns.section_titles(md), ["첫 절", "하위", "둘째 절"])
+
+    def test_ignores_headings_inside_code_blocks(self):
+        # SQL에서 #은 MySQL 주석이다. 코드블록 안을 세면 없는 절이 잡힌다.
+        md = "## 진짜 절\n```sql\n## 이건 주석\nSELECT 1;\n```\n## 또 진짜\n"
+        self.assertEqual(ns.section_titles(md), ["진짜 절", "또 진짜"])
+
+
+class TestNotionOnlySections(unittest.TestCase):
+    def test_identical_returns_empty(self):
+        md = "## A\n내용\n## B\n내용\n"
+        self.assertEqual(ns.notion_only_sections(md, md), [])
+
+    def test_detects_section_only_in_notion(self):
+        remote = "## A\n## 사내 에스컬레이션 경로\n## B\n"
+        local = "## A\n## B\n"
+        self.assertEqual(ns.notion_only_sections(remote, local),
+                         ["사내 에스컬레이션 경로"])
+
+    def test_section_removed_from_notion_is_not_a_hold(self):
+        # wiki에만 있는 절은 새로 추가되는 것이므로 HOLD 사유가 아니다
+        remote = "## A\n"
+        local = "## A\n## 새 절\n"
+        self.assertEqual(ns.notion_only_sections(remote, local), [])
+
+
+class TestConvertPage(unittest.TestCase):
+    def test_returns_frontmatter_and_markdown(self):
+        fm, md = ns.convert_page("aurora-dsql")
+        self.assertEqual(fm["category"], "db운영")
+        self.assertIn("<callout", md)      # Takeaway가 callout으로 변환됨
+        self.assertNotIn("[[", md)          # wikilink가 전부 처리됨
+
+
 if __name__ == "__main__":
     unittest.main()
