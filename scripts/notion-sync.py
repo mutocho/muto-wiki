@@ -342,12 +342,13 @@ def now_iso():
     return stamp[:-2] + ":" + stamp[-2:]
 
 
-def write_log(created, updated, skipped, held, log_path=None):
+def write_log(created, updated, skipped, held, failed=0, log_path=None):
     """wiki/log.md 맨 위에 SYNC_NOTION 한 줄을 넣는다. 최신이 위."""
     path = log_path or (WIKI / "log.md")
     text = path.read_text(encoding="utf-8")
     line = (f"- [{now_iso()}] SYNC_NOTION pages={created + updated} "
             f"created={created} updated={updated} skipped={skipped} held={held} "
+            f"failed={failed} "
             f'target="DBA"')
     marker = "# Wiki Log\n"
     index = text.index(marker) + len(marker)
@@ -444,11 +445,14 @@ def refresh_tree(token):
 # 1회성 초기화
 # --------------------------------------------------------------------------
 
-def reset_stamps(wiki_dir=None):
+def reset_stamps(wiki_dir=None, dry_run=False):
     """notion_page_id·notion_synced를 null로 되돌린다.
 
     Notion에서 페이지를 삭제한 뒤 반드시 먼저 실행한다. 휴지통의 페이지는
     여전히 유효한 id로 조회되므로, 리셋하지 않으면 휴지통 페이지를 되살린다.
+
+    dry_run=True면 바뀔 개수만 세고 파일에는 쓰지 않는다 — 되돌릴 수 없는
+    1회성 조작이므로 미리보기 없이 실행하면 위험하다.
     """
     directory = wiki_dir or WIKI
     count = 0
@@ -462,8 +466,9 @@ def reset_stamps(wiki_dir=None):
         new_fm = re.sub(r"^notion_synced:.*$", "notion_synced: null", new_fm, flags=re.M)
         if new_fm == fm:
             continue
-        path.write_text(f"---\n{new_fm}\n---\n" + text[m.end():], encoding="utf-8")
         count += 1
+        if not dry_run:
+            path.write_text(f"---\n{new_fm}\n---\n" + text[m.end():], encoding="utf-8")
     return count
 
 
@@ -475,7 +480,7 @@ def build_plan(only=None):
     """무엇을 어떻게 할지 먼저 전부 정한다. HTTP 호출은 하지 않는다."""
     sections = index_sections()
     pages = knowledge_pages()
-    slugs = sorted(only) if only else sorted(pages)
+    slugs = sorted(only) if only is not None else sorted(pages)
 
     plan = []
     for slug in slugs:
@@ -532,8 +537,12 @@ def print_plan(plan):
 
 def run(args):
     if args.reset_stamps:
-        count = reset_stamps()
-        print(f"notion_page_id·notion_synced를 null로 되돌렸다: {count}개")
+        count = reset_stamps(dry_run=args.dry_run)
+        if args.dry_run:
+            print(f"--dry-run: notion_page_id·notion_synced를 되돌릴 페이지 {count}개 "
+                  "(파일 변경 없음)")
+        else:
+            print(f"notion_page_id·notion_synced를 null로 되돌렸다: {count}개")
         return 0
 
     plan = build_plan(only=args.only)
@@ -560,7 +569,7 @@ def run(args):
 
     tree = load_tree()
     forced = set(args.force_replace or [])
-    created = updated = held = 0
+    created = updated = held = failed = 0
     skipped = sum(1 for item in plan if item["action"] == "skip")
     held += sum(1 for item in plan if item["action"] == "hold")
 
@@ -589,23 +598,34 @@ def run(args):
 
             if item["action"] == "create":
                 page_id = create_page(token, parent_id, fm["title"], md)
-                created += 1
             else:
                 page_id = item["page_id"]
                 replace_page(token, page_id, md)
-                updated += 1
 
             # 성공 즉시 페이지 단위로 기록한다. 마지막에 몰아 쓰면 중간 실패 시
             # 어디까지 올렸는지 알 수 없어 다음 실행이 전량 재업로드가 된다 (§6.3).
-            stamp_mod.stamp(slug, page_id, now_iso())
+            status = stamp_mod.stamp(slug, page_id, now_iso())
+            if not status.startswith("OK"):
+                # 업로드는 됐지만 프론트매터에 기록하지 못했다 — 다음 실행이
+                # 같은 페이지를 또 만든다. 성공으로 세면 안 된다 (§6.3).
+                print(f"[FAIL]   {slug}: {status}", file=sys.stderr)
+                failed += 1
+                continue
+
+            if item["action"] == "create":
+                created += 1
+            else:
+                updated += 1
             print(f"[ok]     {slug} -> {page_id}")
 
         except (ApiError, KeyError, urllib.error.URLError) as e:
             print(f"[FAIL]   {slug}: {e}", file=sys.stderr)
+            failed += 1
 
-    write_log(created=created, updated=updated, skipped=skipped, held=held)
-    print(f"\n완료: created={created} updated={updated} skipped={skipped} held={held}")
-    return 0
+    write_log(created=created, updated=updated, skipped=skipped, held=held, failed=failed)
+    print(f"\n완료: created={created} updated={updated} skipped={skipped} held={held} "
+          f"failed={failed}")
+    return 1 if failed else 0
 
 
 def main(argv=None):
