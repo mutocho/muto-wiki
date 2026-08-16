@@ -20,7 +20,7 @@ notion_synced: "2026-08-15T23:20:00+0900"
 > [!tip] 핵심 Takeaway
 > - 신규 설치는 버전·에디션·RPO/RTO를 먼저 확정하고, 설치 직후 **CU·메모리 상한·TempDB·백업 복구 테스트**를 배포 게이트로 검사한다. `min server memory = max server memory` 고정은 금지한다
 > - **구축 표준의 설정값은 두 종류로 나눈다.** backup compression·DAC 등 정책값과, NUMA/CPU·워크로드로 산정할 MAXDOP·메모리·TempDB·fill factor를 프로비저닝 코드에서 분리한다
-> - **`SP_DB_BACKUP`은 현 상태로 자동 스케줄 금지 — 결함이 2종이다.** ① 보관 정책이 DB별이 아니라 **확장자 기준 전역**이라 한 DB의 백업 실행이 다른 DB의 백업 파일을 지운다. ② 절차 안에서 **`xp_cmdshell`을 켰다 끄므로** 중단되면 켜진 채 남는다([[db-security-review-patterns]]의 "일상 절차에 보안 상태 변경 혼입"). 수정 전에는 수동 실행만
+> - **`SP_DB_BACKUP`은 현 상태로 자동 스케줄 금지 — 결함 5건이다.** 눈에 보이는 2건: ① 보관 정책이 DB별이 아니라 **확장자 기준 전역**이라 한 DB의 백업 실행이 다른 DB의 백업 파일을 지운다 ② 절차 안에서 **`xp_cmdshell`을 켰다 끄므로** 중단되면 켜진 채 남는다([[db-security-review-patterns]]의 "일상 절차에 보안 상태 변경 혼입"). **나머지 3건(디바이스명 파싱 예외·무알람 실패·비압축 시 CHECKSUM 동반 해제)은 전부 조용히 실패하는 유형**이라 증상으로는 잡히지 않는다 — 목록은 아래 경고 블록, 수정본은 [[sqlserver-backup-procedure]]. 수정 전에는 수동 실행만
 > - **`TRUSTWORTHY ON`은 권한 상승 경로다.** DB 소유자가 sysadmin이면 db_owner가 인스턴스 전체를 장악할 수 있다. `EXECUTE AS OWNER`가 실제로 필요한 DB에만, 소유자를 확인하고 켠다
 
 # SQL Server 운영 지식
