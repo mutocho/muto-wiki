@@ -351,3 +351,86 @@ def write_log(created, updated, skipped, held, log_path=None):
     index = text.index(marker) + len(marker)
     path.write_text(text[:index] + "\n" + line + "\n" + text[index:].lstrip("\n"),
                     encoding="utf-8")
+
+
+# --------------------------------------------------------------------------
+# 컨테이너 트리 (§6.1)
+# --------------------------------------------------------------------------
+
+TREE_FILE = SCRIPTS / "notion-tree.json"
+
+# (컨테이너, 부모). 부모가 먼저 오도록 정렬돼 있다.
+TREE_SPEC = [
+    ("db운영", "DBA"),
+    ("MySQL", "db운영"),
+    ("PostgreSQL", "db운영"),
+    ("SQL Server", "db운영"),
+    ("Aurora DSQL", "db운영"),
+    ("엔진 공통", "db운영"),
+    ("엔진 비교", "엔진 공통"),
+    ("진단·운영 표준", "엔진 공통"),
+    ("보안·권한", "엔진 공통"),
+    ("개발·자동화", "엔진 공통"),
+    ("지식 운영", "엔진 공통"),
+    ("업무기록", "DBA"),
+    ("kakaogames", "업무기록"),
+    ("개인", "DBA"),
+    ("참고자료", "DBA"),
+    ("종합원칙", "DBA"),
+]
+
+
+def load_tree():
+    if not TREE_FILE.exists():
+        return {"DBA": DBA_PAGE_ID}
+    tree = json.loads(TREE_FILE.read_text(encoding="utf-8"))
+    tree.setdefault("DBA", DBA_PAGE_ID)
+    return tree
+
+
+def save_tree(tree):
+    TREE_FILE.write_text(
+        json.dumps(tree, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8")
+
+
+def init_tree(token, dry_run=False):
+    """없는 컨테이너만 만든다. 이미 있는 것은 건드리지 않는다."""
+    tree = load_tree()
+    for name, parent in TREE_SPEC:
+        if name in tree:
+            continue
+        parent_id = tree[parent]
+        tree[name] = create_page(token, parent_id, name, "")
+        print(f"[create-container] {name} -> {parent}")
+        save_tree(tree)          # 중간 실패해도 진행분이 남도록 매번 쓴다
+    save_tree(tree)
+    return tree
+
+
+def refresh_tree(token):
+    """DBA 아래 자식 페이지를 훑어 이름 -> id를 재구성한다."""
+    tree = {"DBA": DBA_PAGE_ID}
+    known = {name for name, _ in TREE_SPEC}
+
+    def walk(page_id):
+        cursor = None
+        while True:
+            path = f"/blocks/{page_id}/children?page_size=100"
+            if cursor:
+                path += f"&start_cursor={cursor}"
+            result = api("GET", path, token)
+            for block in result.get("results", []):
+                if block.get("type") != "child_page":
+                    continue
+                title = block["child_page"]["title"]
+                if title in known:
+                    tree[title] = block["id"]
+                    walk(block["id"])
+            if not result.get("has_more"):
+                return
+            cursor = result.get("next_cursor")
+
+    walk(DBA_PAGE_ID)
+    save_tree(tree)
+    return tree
