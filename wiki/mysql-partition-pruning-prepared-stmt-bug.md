@@ -9,7 +9,7 @@ sources:
 category: db운영
 status: verified
 created: 2026-08-05
-updated: 2026-08-15
+updated: 2026-08-16
 notion_page_id: "3bdfb969-b8be-8191-9dc1-d1f4ada54d07"
 notion_synced: "2026-08-15T22:55:00+0900"
 ---
@@ -143,7 +143,7 @@ SET TIMESTAMP = UNIX_TIMESTAMP('2026-09-01 00:01:50');
 ## Related
 
 - [[mysql-operations|MySQL/Aurora MySQL 운영 지식]]
-- [[operational-queries|운영 쿼리 모음 — 진단·권한·DDL/DML]]
+- [[operational-queries|운영 진단 쿼리 모음]] — 영향 조사 대상 테이블을 찾을 때
 - [[monitoring-incident-runbook|모니터링·장애 대응 런북]]
 - [[dba-agent-work-plan]] — 이런 회귀를 주간 점검으로 자동 포착하려는 계획
 - [[worklog-kakaogames-2026]] — 이 조사를 수행한 업무 기록

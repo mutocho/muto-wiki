@@ -6,7 +6,7 @@ summary: dbgw 메타DB에서 인스턴스별 권한 현황을 뽑는 쿼리 모�
 sources: [사내 dbgw 메타DB 작업 (2026-08-06)]
 status: draft
 created: 2026-08-06
-updated: 2026-08-06
+updated: 2026-08-16
 notion_page_id: "3bdfb969-b8be-816d-953d-f15ad5c620cb"
 notion_synced: "2026-08-15T18:53:45+0900"
 ---
@@ -39,4 +39,4 @@ group by c.dbName;
 ## Related
 
 - [[worklog-kakaogames-2026|2026년 작업 내역]]
-- [[operational-queries|운영 쿼리 모음 — 진단·권한·DDL/DML]]
+- [[operational-queries|운영 진단 쿼리 모음]] — 엔진 일반 진단 쿼리. 이 페이지는 dbgw 메타DB 전용이라는 점이 차이

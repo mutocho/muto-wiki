@@ -6,7 +6,7 @@ summary: 전체 뎁스 수집(~140페이지)에서 발견된 교정 대상 20건
 sources: ["Notion: Muto - DBA 통합 포털 전체 뎁스 감사 (2026-08-04)"]
 status: draft
 created: 2026-08-04
-updated: 2026-08-04
+updated: 2026-08-16
 notion_page_id: "3bdfb969-b8be-81bf-af04-f963cb0668c1"
 notion_synced: "2026-08-15T18:53:45+0900"
 ---
@@ -54,5 +54,6 @@ notion_synced: "2026-08-15T18:53:45+0900"
 
 - [[db-security-review-patterns]] — 여기 나온 위험이 어떤 패턴에 해당하는지
 - [[notion-kb-consolidation-worklog]] — 이 백로그를 낳은 감사 프로젝트
-- [[operational-queries]] — 교정 대상 쿼리를 옮겨올 때 그대로 베끼지 않기 위한 대조본
+- [[operational-queries]] — 교정 대상 진단 쿼리를 옮겨올 때 그대로 베끼지 않기 위한 대조본
+- [[db-change-safe-patterns]] — `TRUNCATE` 생성기·조각화율 단독 판단 REBUILD를 **의도적으로 배제**한 결과물. 이 백로그의 교정 방향이 그대로 반영돼 있다
 - [[verbal-source-verification-policy]] — 색인 드리프트가 수기 집계의 구조적 한계라는 근거

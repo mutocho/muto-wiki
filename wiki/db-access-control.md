@@ -18,7 +18,7 @@ notion_synced: "2026-08-15T22:55:00+0900"
 
 > [!tip] 핵심 Takeaway
 > - **금지 권한 목록이 권한 부여 자동화의 하드 필터다** — MySQL SUPER/FILE/SHUTDOWN/WITH GRANT OPTION, SQL Server 고정 롤(db_owner/db_ddladmin). 요청이 와도 통과시키지 않는다
-> - **권한 변경은 부여로 끝나지 않고 실측 검증까지가 한 단위다** (`SHOW GRANTS`, `sys.database_permissions`). 검증 쿼리는 [[operational-queries]]
+> - **권한 변경은 부여로 끝나지 않고 실측 검증까지가 한 단위다** (`SHOW GRANTS`, `sys.database_permissions`). 부여·검증 쿼리는 [[db-permission-queries]]
 > - **자격증명이 노출되면 문서 수정이 아니라 폐기·재발급이 조치다.** 과거 MySQL 스크립트 페이지에서 실제로 발생한 사고 — 이 원칙을 [[db-security-review-patterns]] 점검에 포함
 > - PG 계정 삭제는 순서가 있다: REASSIGN OWNED → DROP OWNED → DROP USER. 건너뛰면 실패한다
 
@@ -46,7 +46,9 @@ notion_synced: "2026-08-15T22:55:00+0900"
 ## Related
 
 - [[db-security-review-patterns]] — 권한 문서를 감사할 때 찾아야 할 위험 패턴 체크리스트
-- [[operational-queries]] — 권한 감사(12)·권한 부여(13)의 실제 쿼리
+- [[db-permission-queries]] — 이 표준을 실행하는 감사·부여 쿼리. 원칙을 바꿀 때는 이 페이지를, 명령을 찾을 때는 저쪽을 본다
+- [[db-change-safe-patterns]] — 권한 외 변경 명령(DDL·DML)의 같은 등급 안전 절차
+- [[operational-queries]] — 읽기 전용 진단 쿼리
 - [[postgresql-operations]] — PG 롤 설계와 계정 삭제 절차 상세
 - [[mysql-operations]] · [[sqlserver-operations]] — 엔진별 권한 운영 맥락
 - [[sqlserver-backup-procedure]] — `xp_cmdshell`을 켜지 않고 백업을 수행하도록 고친 사례. 운영 프로시저에 어디까지 권한을 요구할지의 판단 기준

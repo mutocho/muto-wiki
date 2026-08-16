@@ -6,7 +6,7 @@ summary: mysqldump/MySQL Shell 백업 도구 분기 기준(실행 상세는 mysq
 sources: ["Notion: MySQL 지식 인덱스 트리 (2026-07-30)", MySQL 8.0/8.4 공식 릴리스 노트]
 status: draft
 created: 2026-08-04
-updated: 2026-08-15
+updated: 2026-08-16
 notion_page_id: "3bdfb969-b8be-817b-afeb-e275a155aa5f"
 notion_synced: "2026-08-15T23:20:00+0900"
 ---
@@ -77,6 +77,8 @@ MEMORY(고정길이, BLOB/TEXT 즉시 디스크 MyISAM) → TempTable(가변길�
 - [[mysql-partition-pruning-prepared-stmt-bug]] — 8.0.42 회귀 상세. 업그레이드 판단의 핵심 근거
 - [[aurora-vs-mysql-replication-architecture]] — Community 복제와 Aurora Reader의 구조 차이
 - [[db-common-concepts]] — 3사 비교 관점에서의 InnoDB 위치
-- [[operational-queries]] — 진단·권한·DML 쿼리
+- [[operational-queries]] — 진단 쿼리 (읽기 전용)
+- [[db-change-safe-patterns]] — `ALGORITHM`·`LOCK` 명시 ONLINE DDL, `sql_safe_updates` 가드, 청크 DELETE의 실행 골격
+- [[db-permission-queries]] — 롤 부여와 `SET DEFAULT ROLE`, 8.0 롤 매핑 조회의 실제 명령
 - [[db-access-control]] — MySQL 금지 권한 목록
 - [[monitoring-incident-runbook]] — 커넥션 고갈·복제 지연의 실제 대응 절차

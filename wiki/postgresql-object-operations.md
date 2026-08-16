@@ -28,7 +28,7 @@ notion_synced: null
 
 # PostgreSQL 오브젝트 운영
 
-이 페이지는 [[postgresql-operations]]의 오브젝트 운영 세부 런북이다. 실행용 DDL과 검증 쿼리는 [[operational-queries]]에 두고, Role 분리 원칙은 [[db-access-control]]을 따른다.
+이 페이지는 [[postgresql-operations]]의 오브젝트 운영 세부 런북이다. 실행용 DDL 골격은 [[db-change-safe-patterns]], 검증·진단 쿼리는 [[operational-queries]]에 두고, Role 분리 원칙은 [[db-access-control]]을 따른다.
 
 ## 소유권과 배포 Role
 

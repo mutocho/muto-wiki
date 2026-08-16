@@ -45,13 +45,15 @@ notion_synced: null
 
 ### 진단·운영 표준
 
-- [[operational-queries]] — 3사 대조 SQL 15개 카테고리. **1~12 읽기 전용 / 13~15 변경 명령**. 실행 검증 전 ( #snippet #troubleshooting)
+- [[operational-queries]] — 3사 대조 진단 SQL 11종. **전부 읽기 전용** — 진단 에이전트에 그대로 실을 수 있는 유일한 묶음. 실행 검증 전 ( #snippet #troubleshooting)
+- [[db-change-safe-patterns]] — DDL·DML 안전 실행 절차. 락 가드·건수 대조·청크 분할. **전부 변경 명령이라 승인 게이트 필수**. 실행 검증 전 ( #snippet #ddl #dml)
 - [[monitoring-incident-runbook]] — 시간박스형(5분/15분/근본) 대응, 점검 주기, 신규 클러스터 체크리스트 ( #monitoring #runbook)
 - [[dba-ops-standards]] — 장애 대응 5단계, 계층형 모니터링, 문서 생명주기 ( #incident-response #runbook)
 
 ### 보안·권한
 
 - [[db-access-control]] — Role 분리, break-glass, 엔진별 금지 권한, PG 계정 삭제 순서 ( #security #access-control)
+- [[db-permission-queries]] — 위 표준을 실행하는 3사 감사·부여 쿼리. **부여 성공 ≠ 의도한 권한** — 실측 검증까지가 한 단위. 실행 검증 전 ( #security #snippet)
 - [[db-security-review-patterns]] — 문서·스크립트 감사 체크리스트. **일상 절차에 섞인 보안 완화 단계를 먼저 찾는다.** 백업 스크립트가 검토 1순위 ( #security #checklist)
 
 ### 개발·자동화
@@ -109,7 +111,8 @@ notion_synced: null
 여러 페이지에 흩어져 있는 미해결 항목. 건강검진 때 진행 상태를 확인한다.
 
 - **[[notion-remediation-backlog]] P1 6건** — 실 서비스 스키마명이 박힌 TRUNCATE 생성기, QA RDS 실호스트명, 개인 이메일 노출. 미착수
-- **[[operational-queries]] 실행 검증** — 개발/QA 인스턴스 확인 후 현장 쿼리로 교체
+- **[[operational-queries]]·[[db-permission-queries]]·[[db-change-safe-patterns]] 실행 검증** — 셋 다 `draft`. 개발/QA 인스턴스 확인 후 현장 쿼리로 교체. 특히 변경 명령 쪽(MSSQL `RESUMABLE`+`ONLINE` 조합, MySQL `ALGORITHM=INSTANT` 조건)은 버전·에디션에 따라 실패한다
+- **분리된 3개 페이지 Notion 미동기화** — 2026-08-16 분할로 신규 2개는 `notion_page_id: null`, 원본은 절이 빠진 상태. Notion에는 아직 15절짜리 구본이 남아 있어 **다음 동기화 전까지 위키와 어긋난다**
 - **[[mysql-dump-load]] mysqldump 상한 수치** — 사내 판단 "수 GB 이하"와 원본 메모 "수십 GB"가 어긋난다 ^[ambiguous]. 보수적 값을 운영 기본으로 뒀으나, 크기가 아니라 **분 단위 RTO로 재정의**하는 것이 맞다
 - **Notion 전사 오류 전수 점검** — `\uXXXX` 이스케이프로 생긴 한글 깨짐이 2026-08-15에만 3개 페이지에서 10곳 발견됐다(`옷길`·`켰다 끓다`·`옷긴다` 등). 나머지 29개 페이지는 미점검. 위키 원문은 정상이므로 **해당 페이지를 전체 교체하면 일괄 해소**된다
 - **건강검진 항목 보강** — 현재 "모순" 점검이 페이지 **간** 수치만 본다. `sqlserver-operations`의 "결함 4건 / 위 5건" 처럼 **페이지 내부의 개수·참조 불일치**는 잡히지 않았다
