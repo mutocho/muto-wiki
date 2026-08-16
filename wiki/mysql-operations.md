@@ -7,8 +7,8 @@ sources: ["Notion: MySQL 지식 인덱스 트리 (2026-07-30)", MySQL 8.0/8.4 �
 status: reviewed
 created: 2026-08-04
 updated: 2026-08-16
-notion_page_id: null
-notion_synced: null
+notion_page_id: "3befb969-b8be-811a-af14-d2f794c57af9"
+notion_synced: "2026-08-16T20:20:10+09:00"
 ---
 
 > [!tip] 핵심 Takeaway

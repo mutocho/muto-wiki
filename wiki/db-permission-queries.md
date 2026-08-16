@@ -7,8 +7,8 @@ sources: [표준 시스템 뷰·카탈로그 기반 자체 작성 (2026-08-04), 
 status: draft
 created: 2026-08-16
 updated: 2026-08-16
-notion_page_id: null
-notion_synced: null
+notion_page_id: "3befb969-b8be-81b6-8da2-d64da87aa51e"
+notion_synced: "2026-08-16T20:20:03+09:00"
 ---
 
 > [!tip] 핵심 Takeaway

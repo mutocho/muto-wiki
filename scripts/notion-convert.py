@@ -46,14 +46,39 @@ def split_frontmatter(text):
 
 
 def mask_code(text):
-    """코드블록을 자리표시자로 치환해 변환에서 제외한다."""
+    """코드·인라인코드를 자리표시자로 치환해 변환에서 제외한다.
+
+    인라인 백틱도 가려야 한다. 위키는 `[[링크]]`·`^[세미나 발언]`처럼
+    **표기법 자체를 인용**할 때 백틱으로 감싸는데(obsidian-wiki-tooling-gotchas
+    참조), 가리지 않으면 conv_inline이 그 안까지 치환해 설명하려던 기호가
+    사라진다 — 2026-08-16 재구축 카나리에서 실제로 발견했다.
+
+    펜스를 먼저 매칭해야 ```가 인라인 패턴에 잘리지 않는다. 인라인 쪽이
+    줄바꿈을 넘지 않게 [^`\\n]로 제한한다.
+    """
+    return _mask(text, r"```.*?```|`[^`\n]+`")
+
+
+def mask_fences(text):
+    """펜스 코드블록만 가린다. 인라인 백틱은 남긴다.
+
+    절 제목 추출(notion-sync의 section_titles)이 쓴다. 거기서는 코드블록 안의
+    `#`(MySQL 주석)만 걸러내면 되고, 인라인까지 가리면 제목 안의 인라인 코드가
+    자리표시자로 바뀐다 — 자리표시자 번호는 원격·로컬이 서로 달라 절 제목이
+    영원히 불일치하고 **모든 페이지가 거짓 HOLD**가 된다. 2026-08-16 재구축
+    2차 패스에서 5개 페이지가 이렇게 막혔다.
+    """
+    return _mask(text, r"```.*?```")
+
+
+def _mask(text, pattern):
     blocks = []
 
     def keep(m):
         blocks.append(m.group(0))
         return f"\x00CODE{len(blocks)-1}\x00"
 
-    return re.sub(r"```.*?```", keep, text, flags=re.S), blocks
+    return re.sub(pattern, keep, text, flags=re.S), blocks
 
 
 def unmask_code(text, blocks):

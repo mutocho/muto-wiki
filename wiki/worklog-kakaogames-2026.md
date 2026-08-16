@@ -7,8 +7,8 @@ sources: [본인 업무 기록]
 status: draft
 created: 2026-08-04
 updated: 2026-08-15
-notion_page_id: null
-notion_synced: null
+notion_page_id: "3befb969-b8be-810c-bd5d-db70730d140d"
+notion_synced: "2026-08-16T20:20:23+09:00"
 ---
 
 > [!tip] 핵심 Takeaway

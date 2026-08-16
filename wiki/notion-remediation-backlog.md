@@ -7,8 +7,8 @@ sources: ["Notion: Muto - DBA 통합 포털 전체 뎁스 감사 (2026-08-04)"]
 status: draft
 created: 2026-08-04
 updated: 2026-08-16
-notion_page_id: null
-notion_synced: null
+notion_page_id: "3befb969-b8be-816f-afff-db0e53a2ce75"
+notion_synced: "2026-08-16T20:20:13+09:00"
 ---
 
 > [!tip] 핵심 Takeaway

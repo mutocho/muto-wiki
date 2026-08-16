@@ -7,8 +7,8 @@ sources: ["Notion: DB 운영 쿼리 인덱스 하위 권한 문서들 (2026-07-3
 status: reviewed
 created: 2026-08-04
 updated: 2026-08-16
-notion_page_id: null
-notion_synced: null
+notion_page_id: "3befb969-b8be-818c-8790-e34fcda573c0"
+notion_synced: "2026-08-16T20:19:58+09:00"
 ---
 
 > [!tip] 핵심 Takeaway

@@ -7,8 +7,8 @@ sources: ["사용자 제공 PostgreSQL 오브젝트 메모 (2026-08-16)", "Postg
 status: reviewed
 created: 2026-08-16
 updated: 2026-08-16
-notion_page_id: null
-notion_synced: null
+notion_page_id: "3befb969-b8be-81c2-8a7d-d3c932416e9c"
+notion_synced: "2026-08-16T20:20:15+09:00"
 ---
 
 > [!tip] 핵심 Takeaway

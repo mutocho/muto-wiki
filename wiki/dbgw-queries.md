@@ -7,8 +7,8 @@ sources: [사내 dbgw 메타DB 작업 (2026-08-06)]
 status: draft
 created: 2026-08-06
 updated: 2026-08-16
-notion_page_id: null
-notion_synced: null
+notion_page_id: "3befb969-b8be-810a-b65d-c1eb0ece11e5"
+notion_synced: "2026-08-16T20:20:06+09:00"
 ---
 
 > [!tip] 핵심 Takeaway
