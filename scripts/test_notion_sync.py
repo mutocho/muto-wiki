@@ -221,6 +221,15 @@ class TestLoadToken(unittest.TestCase):
         with self.assertRaises(ns.AuthError):
             ns.load_token(self.root)
 
+    def test_rejects_env_tracked_by_git(self):
+        import subprocess
+        subprocess.run(["git", "init", "-q", str(self.root)], check=True)
+        self._write_env("NOTION_API_KEY=x\n")
+        subprocess.run(["git", "-C", str(self.root), "add", "-f", ".env"], check=True)
+        with self.assertRaises(ns.AuthError) as cm:
+            ns.load_token(self.root)
+        self.assertIn("추적", str(cm.exception))
+
 
 class TestApiRetry(unittest.TestCase):
     def test_retries_on_429_then_succeeds(self):
