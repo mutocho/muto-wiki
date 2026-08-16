@@ -438,6 +438,191 @@ class TestInitTree(unittest.TestCase):
         # 자식은 방금 만든 부모의 id 아래로 간다
         self.assertIn(("엔진 비교", "id-엔진 공통"), created)
 
+    def test_saves_after_every_creation(self):
+        saves = []
+
+        def fake_create(token, parent_id, title, md):
+            return f"id-{title}"
+
+        def record_save(t):
+            saves.append(dict(t))
+
+        existing = {"DBA": ns.DBA_PAGE_ID, "db운영": "id-db운영"}
+        with unittest.mock.patch.object(ns, "create_page", fake_create):
+            with unittest.mock.patch.object(ns, "load_tree", lambda: dict(existing)):
+                with unittest.mock.patch.object(ns, "save_tree", record_save):
+                    tree = ns.init_tree("tok")
+
+        # save_tree가 최소 15번 호출됨 (15개 컨테이너 생성)
+        self.assertGreaterEqual(len(saves), 15)
+
+        # 스냅샷이 단조 증가: N번째 스냅샷은 N개 이상의 컨테이너를 포함
+        for i, snapshot in enumerate(saves):
+            # i번째 save는 최소 i+2개 항목을 가져야 함 (DBA + db운영 + i개)
+            self.assertGreaterEqual(len(snapshot), i + 2,
+                f"save #{i}는 최소 {i + 2}개 항목을 가져야 하는데 {len(snapshot)}개만 있음")
+
+
+class TestLoadTree(unittest.TestCase):
+    def test_missing_file_returns_dba_only(self):
+        with unittest.mock.patch.object(ns, "TREE_FILE") as mock_file:
+            mock_file.exists.return_value = False
+            tree = ns.load_tree()
+        self.assertEqual(tree, {"DBA": ns.DBA_PAGE_ID})
+
+    def test_file_without_dba_key_seeds_dba(self):
+        import tempfile
+        import json
+        with tempfile.TemporaryDirectory() as d:
+            path = pathlib.Path(d) / "tree.json"
+            path.write_text(json.dumps({"MySQL": "id-mysql"}), encoding="utf-8")
+            with unittest.mock.patch.object(ns, "TREE_FILE", path):
+                tree = ns.load_tree()
+        self.assertEqual(tree["DBA"], ns.DBA_PAGE_ID)
+        self.assertEqual(tree["MySQL"], "id-mysql")
+
+
+class TestRefreshTree(unittest.TestCase):
+    def test_handles_multi_page_results(self):
+        pages_called = []
+
+        def fake_api(method, path, token):
+            pages_called.append(path)
+            # 첫 페이지: db운영 직하 자식들, has_more=true
+            if path == "/blocks/3aefb969b8be801280b8dc2ff35fbefb/children?page_size=100":
+                return {
+                    "results": [
+                        {"type": "child_page", "id": "id-db-ops", "child_page": {"title": "db운영"}}
+                    ],
+                    "has_more": True,
+                    "next_cursor": "cursor-1"
+                }
+            # 두 번째 페이지: 계속 db운영 직하 자식들
+            elif path == "/blocks/3aefb969b8be801280b8dc2ff35fbefb/children?page_size=100&start_cursor=cursor-1":
+                return {
+                    "results": [
+                        {"type": "child_page", "id": "id-mysql", "child_page": {"title": "MySQL"}}
+                    ],
+                    "has_more": False
+                }
+            # db운영 안쪽
+            elif path == "/blocks/id-db-ops/children?page_size=100":
+                return {"results": [], "has_more": False}
+            # MySQL 안쪽
+            elif path == "/blocks/id-mysql/children?page_size=100":
+                return {"results": [], "has_more": False}
+            return {"results": [], "has_more": False}
+
+        saved = {}
+        def fake_save(t):
+            saved.update(t)
+
+        with unittest.mock.patch.object(ns, "api", fake_api):
+            with unittest.mock.patch.object(ns, "save_tree", fake_save):
+                tree = ns.refresh_tree("tok")
+
+        self.assertIn("db운영", tree)
+        self.assertIn("MySQL", tree)
+        self.assertEqual(tree["MySQL"], "id-mysql")
+
+    def test_ignores_non_container_pages(self):
+        def fake_api(method, path, token):
+            # Only DBA has children; non-container and container children return empty
+            if path == "/blocks/3aefb969b8be801280b8dc2ff35fbefb/children?page_size=100":
+                return {
+                    "results": [
+                        {"type": "child_page", "id": "id-db-ops", "child_page": {"title": "db운영"}},
+                        {"type": "child_page", "id": "id-other", "child_page": {"title": "Other Page"}},
+                    ],
+                    "has_more": False
+                }
+            else:
+                return {"results": [], "has_more": False}
+
+        with unittest.mock.patch.object(ns, "api", fake_api):
+            with unittest.mock.patch.object(ns, "save_tree", lambda t: None):
+                tree = ns.refresh_tree("tok")
+
+        self.assertIn("db운영", tree)
+        self.assertNotIn("Other Page", tree)
+
+    def test_recursive_descent(self):
+        # walk() is called recursively on child containers.
+        # Assert that it descends through multiple levels.
+        calls = []
+
+        def fake_api(method, path, token):
+            calls.append(path)
+            if path == "/blocks/3aefb969b8be801280b8dc2ff35fbefb/children?page_size=100":
+                # DBA has two direct children: db운영, 업무기록
+                return {
+                    "results": [
+                        {"type": "child_page", "id": "id-db-ops", "child_page": {"title": "db운영"}},
+                        {"type": "child_page", "id": "id-worklog", "child_page": {"title": "업무기록"}},
+                    ],
+                    "has_more": False
+                }
+            elif path == "/blocks/id-db-ops/children?page_size=100":
+                # db운영 has MySQL
+                return {
+                    "results": [
+                        {"type": "child_page", "id": "id-mysql", "child_page": {"title": "MySQL"}}
+                    ],
+                    "has_more": False
+                }
+            elif path == "/blocks/id-worklog/children?page_size=100":
+                # 업무기록 has kakaogames
+                return {
+                    "results": [
+                        {"type": "child_page", "id": "id-kakaogames", "child_page": {"title": "kakaogames"}}
+                    ],
+                    "has_more": False
+                }
+            else:
+                # All other paths (MySQL, kakaogames children) have no children
+                return {"results": [], "has_more": False}
+
+        with unittest.mock.patch.object(ns, "api", fake_api):
+            with unittest.mock.patch.object(ns, "save_tree", lambda t: None):
+                tree = ns.refresh_tree("tok")
+
+        # Should have discovered: DBA, db운영, MySQL, 업무기록, kakaogames
+        self.assertIn("db운영", tree)
+        self.assertIn("MySQL", tree)
+        self.assertIn("업무기록", tree)
+        self.assertIn("kakaogames", tree)
+        # Should have made recursive calls for each container found
+        self.assertGreater(len(calls), 2, "Should have made multiple API calls due to recursion")
+
+    def test_null_cursor_stops_pagination(self):
+        def fake_api(method, path, token):
+            if path == "/blocks/3aefb969b8be801280b8dc2ff35fbefb/children?page_size=100":
+                # First page: has_more=true with next_cursor
+                return {
+                    "results": [
+                        {"type": "child_page", "id": "id-db-ops", "child_page": {"title": "db운영"}}
+                    ],
+                    "has_more": True,
+                    "next_cursor": "cursor-1"
+                }
+            elif path == "/blocks/3aefb969b8be801280b8dc2ff35fbefb/children?page_size=100&start_cursor=cursor-1":
+                # Second page: has_more=true but cursor=null (edge case that should stop loop)
+                return {
+                    "results": [],
+                    "has_more": True,
+                    "next_cursor": None
+                }
+            else:
+                # All other children return empty
+                return {"results": [], "has_more": False}
+
+        with unittest.mock.patch.object(ns, "api", fake_api):
+            with unittest.mock.patch.object(ns, "save_tree", lambda t: None):
+                # 무한 루프가 안 되고 정상 종료해야 함
+                tree = ns.refresh_tree("tok")
+
+        self.assertIn("db운영", tree)
+
 
 if __name__ == "__main__":
     unittest.main()
