@@ -380,5 +380,26 @@ class TestWriteLog(unittest.TestCase):
             self.assertIn("LINT", lines[1])          # 기존 항목이 아래로 밀림
 
 
+class TestFetchMarkdown(unittest.TestCase):
+    def test_returns_markdown_field(self):
+        with unittest.mock.patch.object(
+                ns, "api", lambda *a, **kw: {"markdown": "## 절\n본문\n"}):
+            self.assertEqual(ns.fetch_markdown("tok", "abc"), "## 절\n본문\n")
+
+    def test_falls_back_to_content_field(self):
+        with unittest.mock.patch.object(
+                ns, "api", lambda *a, **kw: {"content": "## 절\n"}):
+            self.assertEqual(ns.fetch_markdown("tok", "abc"), "## 절\n")
+
+    def test_raises_when_no_body_field(self):
+        with unittest.mock.patch.object(
+                ns, "api", lambda *a, **kw: {"object": "page", "id": "abc"}):
+            with self.assertRaises(ns.ApiError) as cm:
+                ns.fetch_markdown("tok", "abc")
+        # 실패 메시지가 실제 응답 키를 드러내야 다음 사람이 필드명을 고칠 수 있다
+        self.assertIn("id", str(cm.exception))
+        self.assertIn("object", str(cm.exception))
+
+
 if __name__ == "__main__":
     unittest.main()
