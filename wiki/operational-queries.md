@@ -1,7 +1,7 @@
 ---
 title: 운영 진단 쿼리 모음 (MySQL·PostgreSQL·SQL Server)
 tags: [dba, snippet, monitoring, troubleshooting, mysql, postgresql, sqlserver]
-summary: 3사 엔진 진단 쿼리 11종 대조 — 세션·블로킹·슬로우쿼리·크기·인덱스·bloat·복제지연·트랜잭션나이·캐시·대기통계. 전부 읽기 전용. 실행 검증 전이므로 버전 확인 필수.
+summary: 3사 엔진 진단 쿼리 11종 대조 — 세션·블로킹·슬로우쿼리·커넥션·크기·인덱스·bloat·복제지연·트랜잭션나이·캐시·대기통계. 전부 읽기 전용. 실행 검증 전이므로 버전 확인 필수.
 sources: [표준 시스템 뷰·카탈로그 기반 자체 작성 (2026-08-04), "권한·DDL/DML 절을 db-permission-queries·db-change-safe-patterns로 분리 (2026-08-16)"]
 category: db운영
 status: draft

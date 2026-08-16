@@ -112,10 +112,10 @@ notion_synced: null
 
 - **[[notion-remediation-backlog]] P1 6건** — 실 서비스 스키마명이 박힌 TRUNCATE 생성기, QA RDS 실호스트명, 개인 이메일 노출. 미착수
 - **[[operational-queries]]·[[db-permission-queries]]·[[db-change-safe-patterns]] 실행 검증** — 셋 다 `draft`. 개발/QA 인스턴스 확인 후 현장 쿼리로 교체. 특히 변경 명령 쪽(MSSQL `RESUMABLE`+`ONLINE` 조합, MySQL `ALGORITHM=INSTANT` 조건)은 버전·에디션에 따라 실패한다
-- **분리된 3개 페이지 Notion 미동기화** — 2026-08-16 분할로 신규 2개는 `notion_page_id: null`, 원본은 절이 빠진 상태. Notion에는 아직 15절짜리 구본이 남아 있어 **다음 동기화 전까지 위키와 어긋난다**
+- **`notion_page_id: null` 3개 페이지** — [[db-permission-queries]]·[[db-change-safe-patterns]](2026-08-16 [[operational-queries]] 분할로 신규), [[postgresql-object-operations]](2026-08-16 신규 적재). 원본 [[operational-queries]]도 절이 빠진 상태라 **다음 동기화 전까지 위키와 어긋난다**. 분할 건만 추적하다 신규 적재분이 빠져 있던 것을 2026-08-16 3회차 LINT에서 보완했다 — 추적 단위를 "분할"이 아니라 **`notion_page_id`가 null인 페이지 전체**로 잡아야 신규 적재가 매번 새는 것을 막는다
 - **[[mysql-dump-load]] mysqldump 상한 수치** — 사내 판단 "수 GB 이하"와 원본 메모 "수십 GB"가 어긋난다 ^[ambiguous]. 보수적 값을 운영 기본으로 뒀으나, 크기가 아니라 **분 단위 RTO로 재정의**하는 것이 맞다
 - **Notion 전사 오류 전수 점검** — `\uXXXX` 이스케이프로 생긴 한글 깨짐이 2026-08-15에만 3개 페이지에서 10곳 발견됐다(`옷길`·`켰다 끓다`·`옷긴다` 등). 나머지 32개 페이지는 미점검. 위키 원문은 정상이므로 **해당 페이지를 전체 교체하면 일괄 해소**된다
-- **건강검진 항목 보강** — 페이지 **내부**의 개수·참조 불일치 점검을 2026-08-16 LINT에서 처음 실제로 돌려 2건을 잡았다(`sqlserver-operations` Takeaway "2종" vs 본문 "5건", `index` 페이지 수). 남은 과제는 **자동화** — 지금은 `N건/N종/N개` 수동 grep이라 매번 눈으로 대조해야 한다
+- **건강검진 항목 보강** — 페이지 **내부**의 개수·참조 불일치 점검을 2026-08-16 LINT에서 처음 실제로 돌려 2건을 잡았다(`sqlserver-operations` Takeaway "2종" vs 본문 "5건", `index` 페이지 수). 남은 과제는 **자동화** — 지금은 `N건/N종/N개` 수동 grep이라 매번 눈으로 대조해야 한다. 3회차에서 확정된 **오탐 2종은 점검에서 제외**한다: ① 백틱 안 문법 예시 링크(→ [[obsidian-wiki-tooling-gotchas]]) ② `updated` vs git 최종 수정일 대조 — 저장소가 2026-08-15 마이그레이션 커밋으로 시작해 **그 이전 `updated`를 가진 페이지에는 원리상 적용 불가**이고, Notion 스탬프 전용 커밋도 걸러야 한다. **08-15 이후 편집분에만 유효한 점검**이다
 - **[[mysql-dump-load]] 증분 복구 배타 조건** — `dumpBinlogs`의 `since`는 `compatibility` 사용 덤프를 거부하는데, RDS/Aurora 대상은 `strip_definers`가 필수다. 관리형 DB에서 논리 덤프 기반 시점 복구가 성립하는지 미확인
 - **[[notion-llm-wiki-governance]] 역할 분담** — Notion 포털 vs 로컬 위키. 정하지 않으면 이중 관리가 계속된다
 - **[[db-security-review-patterns]] 재검증 주기** — "마지막 검증일 + N개월" 규칙 부재
