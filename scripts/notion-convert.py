@@ -70,8 +70,8 @@ def load_page_ids():
     wiki = pathlib.Path(__file__).resolve().parent.parent / "wiki"
     ids = {}
     for f in glob.glob(str(wiki / "*.md")):
-        m = re.search(r'^notion_page_id:\s*"([^"]+)"',
-                      open(f, encoding="utf-8").read(), re.M)
+        with open(f, encoding="utf-8") as fh:
+            m = re.search(r'^notion_page_id:\s*"([^"]+)"', fh.read(), re.M)
         if m:
             ids[os.path.basename(f)[:-3]] = m.group(1).replace("-", "")
     return ids
