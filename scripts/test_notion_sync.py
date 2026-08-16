@@ -931,5 +931,78 @@ class TestRunHoldGate(unittest.TestCase):
         self.assertEqual(write_log_calls[0]["held"], 0)
 
 
+class TestRunInitTreeOrdering(unittest.TestCase):
+    """--init-tree는 build_plan/print_plan보다 먼저 처리돼야 한다 —
+    안 그러면 35페이지 업로드 계획을 찍어놓고 컨테이너만 만들고 끝나
+    최고위험 순간에 혼란을 준다."""
+
+    def _base_args(self, **overrides):
+        base = dict(reset_stamps=False, only=None, dry_run=False,
+                    force_replace=None, init_tree=False, refresh_tree=False)
+        base.update(overrides)
+        return argparse.Namespace(**base)
+
+    def test_init_tree_does_not_build_plan(self):
+        def explode(*a, **kw):
+            raise AssertionError("init-tree 경로에서 build_plan이 불렸다")
+
+        with contextlib.redirect_stdout(io.StringIO()), \
+             contextlib.redirect_stderr(io.StringIO()), \
+             unittest.mock.patch.object(ns, "load_token", lambda: "tok"), \
+             unittest.mock.patch.object(ns, "init_tree", lambda token: {"DBA": "x"}), \
+             unittest.mock.patch.object(ns, "build_plan", explode), \
+             unittest.mock.patch.object(ns, "knowledge_pages", lambda: {}):
+            code = ns.run(self._base_args(init_tree=True))
+        self.assertEqual(code, 0)
+
+    def test_refresh_tree_does_not_build_plan(self):
+        def explode(*a, **kw):
+            raise AssertionError("refresh-tree 경로에서 build_plan이 불렸다")
+
+        with contextlib.redirect_stdout(io.StringIO()), \
+             contextlib.redirect_stderr(io.StringIO()), \
+             unittest.mock.patch.object(ns, "load_token", lambda: "tok"), \
+             unittest.mock.patch.object(ns, "refresh_tree", lambda token: {"DBA": "x"}), \
+             unittest.mock.patch.object(ns, "build_plan", explode):
+            code = ns.run(self._base_args(refresh_tree=True))
+        self.assertEqual(code, 0)
+
+    def test_dry_run_still_returns_before_load_token(self):
+        def explode(root=None):
+            raise AssertionError("--dry-run인데 load_token이 불렸다")
+
+        with contextlib.redirect_stdout(io.StringIO()), \
+             contextlib.redirect_stderr(io.StringIO()), \
+             unittest.mock.patch.object(ns, "load_token", explode):
+            code = ns.run(self._base_args(dry_run=True))
+        self.assertEqual(code, 0)
+
+    def test_init_tree_warns_on_stale_notion_page_id(self):
+        pages = {
+            "a": {"notion_page_id": "abc123"},
+            "b": {"notion_page_id": "null"},
+        }
+        with contextlib.redirect_stdout(io.StringIO()), \
+             contextlib.redirect_stderr(io.StringIO()) as err, \
+             unittest.mock.patch.object(ns, "load_token", lambda: "tok"), \
+             unittest.mock.patch.object(ns, "init_tree", lambda token: {"DBA": "x"}), \
+             unittest.mock.patch.object(ns, "knowledge_pages", lambda: pages):
+            code = ns.run(self._base_args(init_tree=True))
+        self.assertEqual(code, 0)  # 경고는 치명적이지 않다
+        self.assertIn("--reset-stamps", err.getvalue())
+        self.assertIn("1개", err.getvalue())
+
+    def test_init_tree_no_warning_when_all_stamps_null(self):
+        pages = {"a": {"notion_page_id": "null"}, "b": {"notion_page_id": ""}}
+        with contextlib.redirect_stdout(io.StringIO()), \
+             contextlib.redirect_stderr(io.StringIO()) as err, \
+             unittest.mock.patch.object(ns, "load_token", lambda: "tok"), \
+             unittest.mock.patch.object(ns, "init_tree", lambda token: {"DBA": "x"}), \
+             unittest.mock.patch.object(ns, "knowledge_pages", lambda: pages):
+            code = ns.run(self._base_args(init_tree=True))
+        self.assertEqual(code, 0)
+        self.assertEqual(err.getvalue(), "")
+
+
 if __name__ == "__main__":
     unittest.main()

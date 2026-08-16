@@ -1608,11 +1608,11 @@ python3 scripts/notion-sync.py --only $(ls wiki/*.md | xargs -n1 basename | sed 
 ```bash
 python3 scripts/notion-sync.py --dry-run
 ```
-Expected: `create=0 hold=0`. `update`가 0이 아닐 수 있다 — 이게 정상이다. 35개 중 `updated:
-2026-08-16`인 페이지는 5단계에서 `notion_synced`가 같은 날짜로 찍혔으므로, §6.3의 `>=` 규칙상
-여전히 대상(`update`)이다. 재구축 당일 실행에서는 `updated`가 재구축일과 같은 페이지 수만큼
-`update`가 나오고 나머지가 `skip`이다 — 성공 신호는 `update`가 0인지가 아니라 `create=0
-hold=0`이다.
+6단계의 성공 신호는 **`create=0`과 `hold=0`**이다. `update`는 0이 아닐 수 있다 —
+**재구축을 수행한 날짜와 `updated`가 같은 페이지는 §6.3의 `>=` 규칙에 의해 다시 대상이 된다.**
+며칠 뒤에 재구축하면 전부 `skip=35`가 되고, 당일에 하면 그날 수정한 페이지 수만큼 `update`로
+잡힌다. 둘 다 정상이다. `create`가 0이 아니면 스탬프가 기록되지 않은 것이고, `hold`가 0이
+아니면 절 제목이 어긋난 것이다.
 
 Notion에서 임의의 페이지 2~3개를 열어 mention 링크가 클릭 가능한지 확인한다.
 
