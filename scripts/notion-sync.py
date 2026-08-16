@@ -394,7 +394,7 @@ def save_tree(tree):
         encoding="utf-8")
 
 
-def init_tree(token, dry_run=False):
+def init_tree(token):
     """없는 컨테이너만 만든다. 이미 있는 것은 건드리지 않는다."""
     tree = load_tree()
     for name, parent in TREE_SPEC:
@@ -430,6 +430,8 @@ def refresh_tree(token):
             if not result.get("has_more"):
                 return
             cursor = result.get("next_cursor")
+            if not cursor:
+                return
 
     walk(DBA_PAGE_ID)
     save_tree(tree)
