@@ -33,7 +33,10 @@ muto-wiki/
 ├── scripts/
 │   ├── sync.sh            git 동기화 (원격 우선)
 │   ├── notion-convert.py  위키 마크다운 → Notion 마크다운 (§6.4)
-│   └── notion-stamp.py    notion_page_id·notion_synced 기록 (§6.3)
+│   ├── notion-stamp.py    notion_page_id·notion_synced 기록 (§6.3)
+│   ├── notion-sync.py     **동기화 진입점** — 증분·배치·HOLD·업로드·기록 (§6)
+│   ├── notion-tree.json   Notion 컨테이너 page_id 캐시 (--init-tree가 생성)
+│   └── test_notion_sync.py  동기화 스크립트 테스트
 ├── .claude/settings.json  Claude Code 훅 — 세션 시작 pull / 턴 종료 push
 ├── .codex/hooks.json      Codex 훅 — 같은 동작
 ├── raw/                   원본 자료 — 사용자가 넣고, 에이전트는 읽기만
