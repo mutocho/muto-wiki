@@ -7,7 +7,7 @@ sources: [본인 입력]
 status: draft
 due: 2026-09-05
 created: 2026-08-07
-updated: 2026-08-16
+updated: 2026-09-01
 notion_page_id: "3befb969-b8be-81dc-b828-d5661b7a09c3"
 notion_synced: "2026-08-16T20:20:20+09:00"
 ---
@@ -25,8 +25,8 @@ notion_synced: "2026-08-16T20:20:20+09:00"
 ## 진행 중
 
 - [ ] [[aws-aidlc-workflows-v2-study|AWS AI-DLC 분석]]에 Superpowers `brainstorming` 비교 추가 — 질문 방식, 대안 선택, 승인 지점, 산출물 연결, DBA Agent 적용 장단점
-- [ ] 2026-08-10 10:00 DBGW 성능 개선 — 일괄 실행 `for`문
-- [ ] 2026-08-10 10:00 DBGWS 승인 절차
+- [ ] 2026-08-10 10:00 DBGW 성능 개선 — 일괄 실행 `for`문 ⚠️ 기한 경과(2026-09-01 점검) — 완료/재설정 판단 필요
+- [ ] 2026-08-10 10:00 DBGWS 승인 절차 ⚠️ 기한 경과(2026-09-01 점검) — 완료/재설정 판단 필요
 
 ## 완료
 

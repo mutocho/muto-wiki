@@ -6,7 +6,7 @@ summary: 위키에 대한 모든 쓰기 작업의 시간순 기록. 최신이 �
 sources: [작업 수행 기록]
 status: reviewed
 created: 2026-08-04
-updated: 2026-08-16
+updated: 2026-09-01
 notion_page_id: null
 notion_synced: null
 ---
@@ -18,6 +18,7 @@ notion_synced: null
 
 # Wiki Log
 
+- [2026-09-01T10:30:00+09:00] LINT issues=3 broken_links=0 orphans=0 one_way_links=0 takeaway_violations=0 frontmatter=0 stale=0 contradictions=0 index_mismatch=0 raw_unprocessed=0 secrets=0 notion_lag=18 promotion_candidates=0 note="전 37페이지 4차 점검. **구조 지표 전부 0** — 직전 회차가 남긴 모순 2건이 모두 해소 확인됐다(operational-queries summary 11종=본문 11절, index '총 35개'=실제 35). 확정 오탐 2종(백틱 예시 링크 5건, →index 단방향 4건)은 규칙대로 제외했고 재보고하지 않는다. **조치 1건: todo.md 기한 경과 항목 2건**(2026-08-10 DBGW 성능 개선·DBGWS 승인 절차, 3주 경과)에 경과 표시를 달고 `updated` 갱신 — 페이지 자신의 Takeaway가 '시점이 지난 일정은 건강검진 때 완료 절로 내린다'고 정하지만, 이 둘은 일정이 아니라 **미완 업무**라 완료 체크가 사실과 다른 주장이 되므로 체크하지 않고 판단을 사용자에게 남겼다. **미조치 2건**: ① Notion 재동기화 18건은 §6.3 `>=`에 의한 동일자 재판정일 뿐 내용 드리프트 0인데, `NOTION_API_KEY` 부재로 실행 자체가 막혔다 — 토큰 공급 전까지 매 회차 재보고된다 ② 승격 후보는 **5→0으로 재산정**. mysql-dump-load·sqlserver-operations·db-change-safe-patterns는 본문이 '실행 검증 전'을 명시해 승격이 그 문구와 정면 충돌하고, aurora-vs-mysql-replication-architecture는 출처가 사내 공유 + 문서명뿐(URL 없음)이라 §2.5의 공식 대조 요건을 못 넘는다. 즉 후보 5건은 승격 대기가 아니라 **선행 작업 대기**이며, 이 구분을 못 하면 매 회차 같은 목록이 되살아난다. 신규 관찰 1건: 마지막 내용 편집이 2026-08-16으로 **16일간 INGEST 0** — 90일 stale 기준엔 안 걸리지만 §10-2 관점의 신호로 기록"
 - [2026-08-19T16:00:54+09:00] QUERY query="dsql 관련 설명" result_pages=1 note="[[aurora-dsql]] 요약 답변 — OCC/40001 리트라이, 미지원 기능, 공식 한도, DPU 과금, 부적합 신호, 미확인 3건. 신규 정보 없어 페이지 변경 없음"
 - [2026-08-16T20:25:12+09:00] SYNC_NOTION pages=2 created=0 updated=2 skipped=0 held=0 failed=0 target="DBA"
 - [2026-08-16T20:24:40+09:00] INGEST source="Notion 재구축 세션 실측 (2026-08-16)" pages_created=0 pages_updated=3 note="재구축 중 적발·수정한 스크립트 버그 2건을 [[obsidian-wiki-tooling-gotchas]]에 'Notion 동기화 변환기 함정' 절로 적재. ① **변환기의 코드 보호 경계가 펜스에만 걸려 있었다** — 위키는 `[[링크]]`·`^[세미나 발언]`처럼 표기법 자체를 인용할 때 백틱을 쓰는데 변환기가 그 안까지 치환해 설명하려던 기호를 지웠다. 하필 표기법을 다루는 obsidian-wiki-tooling-gotchas 자신이 최대 피해자였다(`[[dev-tooling-standards]]` → 대괄호 소실). `mask_code()`가 인라인 백틱도 가리도록 수정. ② **Notion 마크다운 왕복 비대칭** — `GET /markdown`이 `~`를 `\\~`로 이스케이프하고 `CLAUDE.md`를 `[CLAUDE.md](http://CLAUDE.md)`로 자동 링크화해 돌려준다. §6.2 HOLD 검사가 절 제목을 문자열 그대로 비교해 4개 페이지가 **영구 HOLD** 상태였다. `normalize_title()` 추가, 보고는 원문·비교만 정규화. ③ 파생 교훈으로 **마스킹 함수 공유 문제**도 기록 — ①을 고치자 같은 함수를 재사용하던 절 제목 추출기가 제목 속 인라인 코드를 자리표시자로 바꿔 전 페이지 거짓 HOLD를 냈다(`mask_code`/`mask_fences` 분리로 해소). Takeaway는 줄을 늘리지 않고 기존 백틱 규약 줄을 '점검기·변환기 양방향' 으로 확장 + 왕복 비대칭 1줄 추가(4→5줄). 교차참조는 [[notion-llm-wiki-governance]]와 상호 연결(§4) — 포털 내용이 원문과 달라 보이면 내용이 아니라 변환 단계를 의심하라는 맥락. index 항목·태그 갱신. **부수로 미완 과제 2건 해소 처리**: `notion_page_id: null` 3건(전량 재생성), Notion 전사 오류 전수 점검(35페이지 되읽어 `\\uXXXX` 깨짐 0건 확인). 대신 신규 과제 1건 등록 — **`failed=0`이 렌더링 정합성을 보증하지 않는다**는 것이 이번의 핵심 교훈이라 되읽기 검증을 재구축 절차에 명문화할 것. 재검증: 깨진 링크 0(백틱 예시 5건 제외) / 고아 0 / 단방향 0 / Takeaway 위반 0 / index 집합 일치"
