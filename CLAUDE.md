@@ -531,18 +531,21 @@ self-closing이라 제목은 Notion이 자동 표시하므로 위키 제목과 �
 
 ## 8. git 동기화
 
-**세션을 열 때 최신을 내려받고, 마칠 때 올린다. 충돌 시 원격(origin/main)이 항상 우선한다.**
+**pull만 자동이고, 커밋·푸시는 사용자가 지시할 때만 한다.** 충돌 시 원격(origin/main)이 항상 우선한다.
 
 ```bash
-bash scripts/sync.sh pull   # 세션 시작 시
-bash scripts/sync.sh push   # 작업 종료 시
+bash scripts/sync.sh pull   # 세션 시작 시 (훅이 자동 실행)
+bash scripts/sync.sh push   # 사용자가 명시적으로 지시할 때만
 ```
 
-- **Claude Code**: `.claude/settings.json` 훅이 자동 실행한다 (`SessionStart` → pull, `Stop` → push). 수동 실행 불필요
-- **Codex**: `.codex/hooks.json` 훅이 같은 동작을 한다. 수동 실행 불필요.
-  Claude와 달리 `$CLAUDE_PROJECT_DIR`이 없으므로 `$(git rev-parse --show-toplevel)`로 repo root를 찾는다
-- **그 외 에이전트**: 훅이 없으므로 **직접 실행한다.**
-  세션 시작 후 첫 작업 전에 `pull`, 위키 파일을 고친 뒤 `push`
+- **자동 커밋·자동 푸시는 2026-09-16에 제거했다.** `Stop` 훅(`.claude/settings.json`·`.codex/hooks.json`)과
+  `pull()`의 `git add -A` + 자동 커밋을 둘 다 없앴다. 자동 스테이징이 **의도치 않은 파일을 뭉뚱그려 담아
+  원격까지 밀어 올리기 때문**이며, 실제로 `work/`의 민감정보가 public 저장소에 푸시된 사고가 있었다 (§8 git 규칙)
+- **`pull`은 워킹트리가 깨끗할 때만 동작한다.** 로컬 변경이 있으면 커밋하지 않고 **건너뛴다** —
+  변경을 보존하려고 자동 커밋하던 옛 동작의 대체다. 직접 커밋하거나 stash 후 재실행한다
+- **Claude Code**: `.claude/settings.json` 훅이 `SessionStart` → pull만 실행한다
+- **Codex**: `.codex/hooks.json`이 같다. `$CLAUDE_PROJECT_DIR`이 없으므로 `$(git rev-parse --show-toplevel)` 사용
+- **그 외 에이전트**: 훅이 없으므로 세션 시작 후 첫 작업 전에 `pull`을 직접 실행한다
 
 ### git 규칙
 

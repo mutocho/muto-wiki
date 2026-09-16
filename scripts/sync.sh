@@ -35,9 +35,12 @@ resolve_theirs() {
 pull() {
   has_remote || exit 0
 
-  # 로컬 변경이 있으면 병합 전에 먼저 커밋해 보존한다.
-  git add -A
-  git diff --cached --quiet || git commit -qm "wiki: 동기화 전 로컬 변경 보존 $(date +%F' '%T)"
+  # 자동 커밋하지 않는다. 로컬 변경이 있으면 pull을 건너뛴다.
+  # (커밋·푸시는 사용자가 명시적으로 할 때만 — 자동 커밋은 의도치 않은 파일까지 담는다)
+  if ! git diff --quiet || ! git diff --cached --quiet; then
+    echo "sync.sh: 로컬 변경이 있어 pull을 건너뛴다. 직접 커밋하거나 stash 후 재시도." >&2
+    exit 0
+  fi
 
   if ! git pull --no-rebase -X theirs -q; then
     # 인증·네트워크·권한 실패는 병합 충돌이 아니다.
