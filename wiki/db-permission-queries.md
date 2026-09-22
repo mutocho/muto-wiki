@@ -252,7 +252,7 @@ GRANT pg_read_all_data TO svcmon;       -- 14+ (조회 전용 감사에 필요�
 
 ```sql
 -- 1) 남은 권한 확인 (1절의 role_table_grants)
--- 2) 소유 객체 이관
+-- 2) 소유 객체 이관 (실행자는 old_role·svc 양쪽 멤버여야 한다 — [[postgresql-object-operations]] 소유권 일괄 이관)
 REASSIGN OWNED BY old_role TO svc;
 -- 3) 남은 권한 부여 내역 제거
 DROP OWNED BY old_role;

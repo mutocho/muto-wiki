@@ -2,11 +2,11 @@
 title: PostgreSQL 오브젝트 운영 — 소유권·DDL·인덱스·파티션·뷰
 category: db운영
 tags: [postgresql, ddl, index, partitioning, schema]
-summary: 테이블 소유권과 SET ROLE, 타입·복사 방식, 트랜잭션 DDL, 온라인 인덱스·파티션, 뷰와 시퀀스의 운영 안전 기준.
-sources: ["사용자 제공 PostgreSQL 오브젝트 메모 (2026-08-16)", "PostgreSQL 공식 문서: CREATE TABLE·CREATE VIEW·CREATE INDEX·Table Partitioning·CREATE SEQUENCE (2026-08-16 대조)"]
+summary: 테이블 소유권과 SET ROLE, 소유권 일괄 이관(REASSIGN OWNED) 순서, 타입·복사 방식, 트랜잭션 DDL, 온라인 인덱스·파티션, 뷰와 시퀀스의 운영 안전 기준.
+sources: ["사용자 제공 PostgreSQL 오브젝트 메모 (2026-08-16)", "사용자 제공 DB 오너 변경 메모 — 순서·범위 교정 (2026-09-22)", "PostgreSQL 공식 문서: CREATE TABLE·CREATE VIEW·CREATE INDEX·Table Partitioning·CREATE SEQUENCE (2026-08-16 대조)"]
 status: reviewed
 created: 2026-08-16
-updated: 2026-08-16
+updated: 2026-09-22
 notion_page_id: "3befb969-b8be-81c2-8a7d-d3c932416e9c"
 notion_synced: "2026-08-16T20:20:15+09:00"
 ---
@@ -14,6 +14,7 @@ notion_synced: "2026-08-16T20:20:15+09:00"
 > [!tip] 핵심 Takeaway
 > - DDL 배포 전 `session_user`, `current_user`, 예상 소유자를 검사한다. 스키마 소유자와 테이블 소유자는 자동으로 일치하지 않으므로 배포자는 `SET ROLE <owner>` 후 생성한다
 > - `ALTER DEFAULT PRIVILEGES`는 객체 생성 Role 기준이다. 소유자가 어긋난 객체는 소유권 이관과 현재 권한 보정 없이는 미래 권한 정책에 편입되지 않는다
+> - 소유권 일괄 이관은 **멤버십 GRANT → `REASSIGN OWNED` → REVOKE** 순서다. `REASSIGN`은 스키마 한정이 아니라 그 롤의 DB 내 전 소유 객체를 옮기므로 범위를 먼저 확인한다
 > - 운영 인덱스 작업은 `CONCURRENTLY` + `lock_timeout` + INVALID 후속 검사를 한 단위로 실행한다. “온라인”을 “무잠금”으로 해석하지 않는다
 > - 파티션 ATTACH는 범위 CHECK를 미리 검증해 스캔과 락 시간을 줄이고, 부모 인덱스는 자식별 CIC 후 ATTACH한다
 > - 시퀀스 값은 롤백되지 않아 원래부터 gapless가 아니다. `CACHE`를 키우면 구멍과 세션 간 반환 순서 역전이 더 커질 수 있으므로 업무 일련번호로 사용하지 않는다
@@ -40,6 +41,29 @@ ALTER TABLE svc.orders OWNER TO svc_owner;
 ```
 
 소유권 변경 뒤에도 로그인 Role과 권한 묶음 Role의 현재 GRANT가 기대값과 일치하는지 별도로 검사한다. 소유자 변경만으로 `ALTER DEFAULT PRIVILEGES`가 과거 객체에 소급 적용되지는 않는다.
+
+### 소유권 일괄 이관 (스키마·기존 오브젝트)
+
+`old_owner` → `new_owner`로 옮기는 표준 순서. **멤버십 부여가 먼저다** — `ALTER ... OWNER TO`는 실행자가 대상 소유자이면서 새 소유 롤의 멤버여야 하고, `REASSIGN OWNED`는 원 롤·대상 롤 **양쪽** 멤버십을 요구한다. 슈퍼유저가 아닌 RDS `rds_superuser`도 예외가 아니다.
+
+```sql
+-- 0) 실행자에게 양쪽 롤 멤버십 (ADMIN OPTION 또는 CREATEROLE 필요)
+GRANT old_owner TO CURRENT_USER;
+GRANT new_owner TO CURRENT_USER;
+
+-- 1) old_owner 소유 오브젝트 전부 이관 — 스키마 자체도 포함되므로 ALTER SCHEMA는 따로 필요 없다
+SET lock_timeout = '5s';
+REASSIGN OWNED BY old_owner TO new_owner;
+
+-- 2) 뒷정리
+REVOKE old_owner, new_owner FROM CURRENT_USER;   -- 임시 멤버십 회수
+```
+
+- **`REASSIGN OWNED`는 스키마 한정이 아니다.** 현재 DB에서 `old_owner`가 가진 **모든** 오브젝트와 공유 오브젝트(DB·테이블스페이스)까지 넘어간다. 특정 스키마만 옮길 때는 `pg_class`·`pg_proc` 등을 `relnamespace = 'forum'::regnamespace`로 걸어 `ALTER ... OWNER TO`를 돌린다.
+- DB 단위 명령이다. `old_owner`가 소유 객체를 가진 **DB마다** 실행한다.
+- `ALTER DEFAULT PRIVILEGES FOR ROLE old_owner`는 이관되지 않는다. 그대로 두면 새 오브젝트에 옛 정책이 계속 걸리므로 `new_owner` 기준으로 다시 선언한다 — [[postgresql-operations]]의 기본 권한 규칙.
+- 오브젝트마다 `ACCESS EXCLUSIVE` 락을 잡으므로 `lock_timeout`을 걸고 저부하 시간대에 실행한다. [[db-change-safe-patterns]]의 락 가드 원칙과 같다.
+- 계정 삭제까지 이어질 때의 후속(`DROP OWNED` → `DROP ROLE`)은 [[db-permission-queries]] 2절.
 
 ## 식별자와 타입 선택
 
@@ -130,6 +154,8 @@ WHERE NOT i.indisvalid;
 ## Sources
 
 - 사용자 제공 PostgreSQL 오브젝트 메모 (2026-08-16)
+- 사용자 제공 DB 오너 변경 메모 (2026-09-22) — GRANT 순서·REASSIGN 범위 교정해 반영
+- PostgreSQL 공식 문서, *REASSIGN OWNED*, *ALTER SCHEMA*, *GRANT*
 - PostgreSQL 공식 문서, *CREATE TABLE*, *CREATE TABLE AS*, *CREATE VIEW*
 - PostgreSQL 공식 문서, *CREATE INDEX*, *REINDEX*, *Table Partitioning*
 - PostgreSQL 공식 문서, *System Information Functions and Operators*, *CREATE SEQUENCE*
