@@ -32,15 +32,17 @@ resolve_theirs() {
   git commit -qm "wiki: 충돌 자동 해소 (원격 우선)" || true
 }
 
+# 전부 스테이징하되 민감정보 파일(CLAUDE.md §8 git 규칙)은 항상 제외한다. work/는 .gitignore가 막는다.
+stage_all() {
+  git add -A -- . ':!.env' ':!*.pem' ':!*.key' ':!*.p12' ':!id_rsa*' ':!credentials' ':!*.tfstate' ':!.pgpass'
+}
+
 pull() {
   has_remote || exit 0
 
-  # 자동 커밋하지 않는다. 로컬 변경이 있으면 pull을 건너뛴다.
-  # (커밋·푸시는 사용자가 명시적으로 할 때만 — 자동 커밋은 의도치 않은 파일까지 담는다)
-  if ! git diff --quiet || ! git diff --cached --quiet; then
-    echo "sync.sh: 로컬 변경이 있어 pull을 건너뛴다. 직접 커밋하거나 stash 후 재시도." >&2
-    exit 0
-  fi
+  # 로컬 변경이 있으면 병합 전에 먼저 커밋해 보존한다.
+  stage_all
+  git diff --cached --quiet || git commit -qm "wiki: 동기화 전 로컬 변경 보존 $(date +%F' '%T)"
 
   if ! git pull --no-rebase -X theirs -q; then
     # 인증·네트워크·권한 실패는 병합 충돌이 아니다.
@@ -50,7 +52,7 @@ pull() {
 }
 
 push() {
-  git add -A
+  stage_all
   if git diff --cached --quiet; then
     # 올릴 변경이 없어도 앞선 커밋이 밀려 있을 수 있다.
     has_remote && git push -q >/dev/null 2>&1

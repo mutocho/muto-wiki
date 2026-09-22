@@ -531,21 +531,21 @@ self-closing이라 제목은 Notion이 자동 표시하므로 위키 제목과 �
 
 ## 8. git 동기화
 
-**pull만 자동이고, 커밋·푸시는 사용자가 지시할 때만 한다.** 충돌 시 원격(origin/main)이 항상 우선한다.
+**pull·커밋·푸시 전부 자동이다.** 충돌 시 원격(origin/main)이 항상 우선한다.
 
 ```bash
 bash scripts/sync.sh pull   # 세션 시작 시 (훅이 자동 실행)
-bash scripts/sync.sh push   # 사용자가 명시적으로 지시할 때만
+bash scripts/sync.sh push   # 턴 종료 시 (Stop 훅이 자동 실행)
 ```
 
-- **자동 커밋·자동 푸시는 2026-09-16에 제거했다.** `Stop` 훅(`.claude/settings.json`·`.codex/hooks.json`)과
-  `pull()`의 `git add -A` + 자동 커밋을 둘 다 없앴다. 자동 스테이징이 **의도치 않은 파일을 뭉뚱그려 담아
-  원격까지 밀어 올리기 때문**이며, 실제로 `work/`의 민감정보가 public 저장소에 푸시된 사고가 있었다 (§8 git 규칙)
-- **`pull`은 워킹트리가 깨끗할 때만 동작한다.** 로컬 변경이 있으면 커밋하지 않고 **건너뛴다** —
-  변경을 보존하려고 자동 커밋하던 옛 동작의 대체다. 직접 커밋하거나 stash 후 재실행한다
-- **Claude Code**: `.claude/settings.json` 훅이 `SessionStart` → pull만 실행한다
+- **자동 커밋·푸시는 2026-09-16에 제거했다가 2026-09-22에 복원했다.** 제거 원인이었던 `work/` 민감정보 푸시 사고는
+  `.gitignore`의 `work/` 제외로 막고, `sync.sh`의 `stage_all()`이 §8 git 규칙의 "항상 제외" 파일
+  (`.env`, `*.pem`, `*.key`, `*.p12`, `id_rsa*`, `credentials`, `*.tfstate`, `.pgpass`)을 스테이징에서 빼는 것으로 대체했다.
+  **민감정보를 담을 파일은 `work/` 아래에 둔다** — 그 밖의 경로는 자동으로 올라간다
+- `pull`은 로컬 변경이 있으면 먼저 자동 커밋해 보존한 뒤 병합한다
+- **Claude Code**: `.claude/settings.json` 훅이 `SessionStart` → pull, `Stop` → push
 - **Codex**: `.codex/hooks.json`이 같다. `$CLAUDE_PROJECT_DIR`이 없으므로 `$(git rev-parse --show-toplevel)` 사용
-- **그 외 에이전트**: 훅이 없으므로 세션 시작 후 첫 작업 전에 `pull`을 직접 실행한다
+- **그 외 에이전트**: 훅이 없으므로 세션 시작 후 첫 작업 전에 `pull`, 작업 끝에 `push`를 직접 실행한다
 
 ### git 규칙
 
