@@ -6,7 +6,7 @@ summary: muto-wiki 전체 목차. 페이지가 추가·변경될 때마다 갱�
 sources: [wiki/*.md 프론트매터]
 status: reviewed
 created: 2026-08-15
-updated: 2026-08-16
+updated: 2026-09-22
 notion_page_id: null
 notion_synced: null
 ---
@@ -18,7 +18,7 @@ notion_synced: null
 
 # Wiki Index
 
-*총 35개 페이지(색인 2개 제외). 마지막 갱신: 2026-08-16*
+*총 35개 페이지(색인 2개 제외). 마지막 갱신: 2026-09-22*
 
 전체 운영 규칙은 저장소 루트의 `CLAUDE.md`. 작업 이력은 [[log]].
 
@@ -45,7 +45,7 @@ notion_synced: null
 
 ### 진단·운영 표준
 
-- [[operational-queries]] — 3사 대조 진단 SQL 11종. **전부 읽기 전용** — 진단 에이전트에 그대로 실을 수 있는 유일한 묶음. 실행 검증 전 ( #snippet #troubleshooting)
+- [[operational-queries]] — 3사 대조 진단 SQL 11종 + RDS Access denied CloudWatch Logs Insights 추출. **전부 읽기 전용** — 진단 에이전트에 그대로 실을 수 있는 유일한 묶음. 실행 검증 전 ( #snippet #troubleshooting)
 - [[db-change-safe-patterns]] — DDL·DML 안전 실행 절차. 락 가드·건수 대조·청크 분할. **전부 변경 명령이라 승인 게이트 필수**. 실행 검증 전 ( #snippet #ddl #dml)
 - [[monitoring-incident-runbook]] — 시간박스형(5분/15분/근본) 대응, 점검 주기, 신규 클러스터 체크리스트 ( #monitoring #runbook)
 - [[dba-ops-standards]] — 장애 대응 5단계, 계층형 모니터링, 문서 생명주기 ( #incident-response #runbook)

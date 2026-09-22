@@ -330,7 +330,7 @@ ALTER LOGIN sa DISABLE;
 ## Related
 
 - [[db-access-control|3-엔진 계정·권한 관리 표준]] — 이 쿼리들이 구현하는 설계 원칙. 금지 권한 목록이 부여 자동화의 하드 필터다
-- [[operational-queries|운영 진단 쿼리 모음]] — 같은 3사 대조 형식의 읽기 전용 진단 쿼리
+- [[operational-queries|운영 진단 쿼리 모음]] — 같은 3사 대조 형식의 읽기 전용 진단 쿼리. 12절의 Access denied 추출 결과(`db_user`·`client_host`)를 1절 계정 감사와 대조해 외부 시도/설정 오류를 분류한다
 - [[db-change-safe-patterns|DDL·DML 안전 실행 패턴]] — 같은 "승인 게이트 필수" 등급의 변경 명령
 - [[db-security-review-patterns|DB 문서 보안 검토 위험 패턴]] — 권한 문서를 감사할 때의 체크리스트
 - [[postgresql-operations|PostgreSQL 운영 지식]] — Role 설계와 계정 삭제 절차 상세

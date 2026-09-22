@@ -1,12 +1,12 @@
 ---
 title: 운영 진단 쿼리 모음 (MySQL·PostgreSQL·SQL Server)
 tags: [dba, snippet, monitoring, troubleshooting, mysql, postgresql, sqlserver]
-summary: 3사 엔진 진단 쿼리 11종 대조 — 세션·블로킹·슬로우쿼리·커넥션·크기·인덱스·bloat·복제지연·트랜잭션나이·캐시·대기통계. 전부 읽기 전용. 실행 검증 전이므로 버전 확인 필수.
-sources: [표준 시스템 뷰·카탈로그 기반 자체 작성 (2026-08-04), "권한·DDL/DML 절을 db-permission-queries·db-change-safe-patterns로 분리 (2026-08-16)"]
+summary: 3사 엔진 진단 쿼리 11종 대조 — 세션·블로킹·슬로우쿼리·커넥션·크기·인덱스·bloat·복제지연·트랜잭션나이·캐시·대기통계 + RDS 접속 실패(Access denied) CloudWatch Logs Insights 추출. 전부 읽기 전용. 실행 검증 전이므로 버전 확인 필수.
+sources: [표준 시스템 뷰·카탈로그 기반 자체 작성 (2026-08-04), "권한·DDL/DML 절을 db-permission-queries·db-change-safe-patterns로 분리 (2026-08-16)", "사용자 작성 CloudWatch Logs Insights Access denied 쿼리 (2026-09-22)"]
 category: db운영
 status: draft
 created: 2026-08-04
-updated: 2026-08-16
+updated: 2026-09-22
 notion_page_id: "3befb969-b8be-81ab-8fc1-c18da9521961"
 notion_synced: "2026-08-16T20:20:15+09:00"
 ---
@@ -16,6 +16,7 @@ notion_synced: "2026-08-16T20:20:15+09:00"
 > - **아직 실행 검증 전(`draft`)이다.** 개발/QA 인스턴스에서 확인한 뒤 현장 쿼리로 교체하는 것이 미완 과제. 검증 전에는 자동화에 그대로 태우지 않는다
 > - **3사 대조 구조가 이 페이지의 가치다.** 같은 목적의 쿼리를 엔진별로 나란히 두면 다중 엔진 진단 툴의 추상화 경계가 그대로 보인다
 > - 임계값은 전부 일반론이다 — **기준선 보정 없이 알람 규칙으로 박지 않는다** ([[monitoring-incident-runbook]])
+> - **접속 실패는 엔진 뷰가 아니라 CloudWatch 에러 로그에서 뽑는다(12절).** error 로그 발행이 꺼진 인스턴스는 이 진단 자체가 불가 — 신규 클러스터 체크리스트의 로그 발행 항목이 선행 조건
 > - 원본 문서에서 발견된 오류(MySQL에 PG 전용 `FILTER (WHERE)` 혼입, `blocked > 50` 임계치 오독)를 옮겨오지 않도록 주의 — [[notion-remediation-backlog]]
 
 # 운영 진단 쿼리 모음
@@ -510,10 +511,42 @@ ORDER BY wait_time_ms DESC;
 > **양성(benign) 대기 제외 목록은 위가 전부가 아니다** — 실제로는 40여 종이며 버전마다 늘어난다. 여기 목록은 흔한 것만 추린 축약형이므로, 결과 상위에 낯선 `*_SLEEP`·`*_QUEUE` 계열이 보이면 제외 목록에 추가한다.^[inferred]
 > `CXPACKET` 상위면 MAXDOP·Cost Threshold 검토, 컴파일 폭주면 `OPTIMIZE FOR AD HOC` + 파라미터화 — [[sqlserver-operations]]의 CPU 100% 대응 흐름.
 
+## 12. 접속 실패(Access denied) 추출 — RDS/Aurora 에러 로그 (CloudWatch Logs Insights)
+
+엔진 내부 뷰가 아니라 **CloudWatch로 발행된 에러 로그**를 보는 항목이다. 접속 실패는 엔진 안에 누적 집계가 없어(MySQL `performance_schema.host_cache`는 호스트 단위·재시작 시 초기화) 로그가 유일한 1차 소스다. 실행 전제: 인스턴스/클러스터의 **error 로그 CloudWatch 발행이 켜져 있어야 한다** ([[monitoring-incident-runbook]] 신규 클러스터 체크리스트).
+
+**MySQL / Aurora MySQL**
+
+```
+SOURCE logGroups(namePrefix: ["/aws/rds/"], class: "STANDARD") START=-10h END=0s
+| filter @message like /Access denied/
+| parse @message /Access denied for user '(?<db_user>[^'@]*)'@'(?<client_host>[^']*)'/
+| parse @message /to database '(?<db_schema>[^']*)'/
+| parse @log /:\/aws\/rds\/(?:cluster|instance)\/(?<db_id>[^\/]+)\/error$/
+| filter ispresent(client_host)
+| stats count(*) as cnt,
+        min(@timestamp) as first_ms,
+        max(@timestamp) as last_ms
+    by db_id, db_user, db_schema, client_host
+| fields fromMillis(first_ms + 32400000) as first_seen_kst,
+         fromMillis(last_ms  + 32400000) as last_seen_kst
+| display db_id, db_user, db_schema, client_host, cnt,
+          first_seen_kst, last_seen_kst
+| sort cnt desc
+| limit 500
+```
+
+- `SOURCE logGroups(namePrefix:)`는 계정 내 `/aws/rds/` 로그 그룹 전체를 한 번에 훑는다 — 인스턴스별로 로그 그룹을 고르지 않아도 된다. `@log`에서 `db_id`를 다시 파싱해 인스턴스·클러스터 단위로 집계한다.
+- `db_schema`는 `Access denied for user ... to database 'x'` 형태(스키마 권한 부족)에서만 채워진다. 비밀번호 오류(`(using password: YES)`)는 `db_schema`가 비어 나온다 — **두 유형을 같은 행으로 합치지 말고 `db_schema` 유무로 구분**해 읽는다.^[inferred]
+- `+ 32400000`은 KST 보정(UTC+9, ms). `fromMillis`가 UTC 기준이라 콘솔 시간대와 어긋나므로 명시 보정한다.
+- `cnt`가 짧은 구간에 몰리면 크레덴셜 스터핑·배치 계정 비밀번호 만료 후보. 상위 행의 `client_host`를 [[db-permission-queries]] 1절 계정 감사와 대조해 **존재하지 않는 계정이면 외부 시도, 존재하면 설정 오류**로 1차 분류한다.^[inferred]
+
+> **PostgreSQL·SQL Server 미수록.** 로그 문구가 다르다 — PG `password authentication failed for user "x"` / `no pg_hba.conf entry for host`, SQL Server `Login failed for user 'x'. Reason: ... [CLIENT: ip]`. `parse` 정규식만 바꾸면 같은 골격을 쓸 수 있으나 아직 작성·검증 전.^[inferred]
+
 ## 후속 / 미수록
 
 - **실제 사용 중인 쿼리로 대체·검증 필요.** 위는 표준 뷰 기반 일반형이므로, 현장에서 쓰는 버전이 있으면 그것으로 교체하고 `status`를 올린다.
-- 미수록: 파티션 현황, 통계 최신성(마지막 ANALYZE/UPDATE STATISTICS), 백업 이력 조회, Aurora 전용 지표 뷰.
+- 미수록: 접속 실패 추출의 PG·SQL Server판(12절), 파티션 현황, 통계 최신성(마지막 ANALYZE/UPDATE STATISTICS), 백업 이력 조회, Aurora 전용 지표 뷰.
 - [[aurora-dsql]]은 이 페이지 대상이 아니다 — 시스템 카탈로그가 제한적이고 VACUUM·bloat·복제 지연 개념 자체가 없다.
 
 ## Related
