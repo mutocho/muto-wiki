@@ -6,7 +6,7 @@ sources: [표준 시스템 뷰·카탈로그 기반 자체 작성 (2026-08-04), 
 category: db운영
 status: draft
 created: 2026-08-04
-updated: 2026-09-22
+updated: 2026-09-23
 notion_page_id: "3befb969-b8be-81ab-8fc1-c18da9521961"
 notion_synced: "2026-08-16T20:20:15+09:00"
 ---
@@ -271,6 +271,8 @@ LIMIT 20;
 ```
 
 > `table_rows`는 InnoDB에서 **추정치**다. 정확한 건수는 `COUNT(*)`로 직접 세야 한다.
+
+> **행 수의 3사 신뢰도가 다르다.** SQL Server `sys.partitions.rows`(`sp_spaceused`)는 정확값, MySQL `table_rows`·PG `reltuples`는 마지막 통계 시점의 **추정치**다. PG에서 부하 없이 세는 수단은 셋 — ① `pg_class.reltuples`(ANALYZE 시점), ② `pg_stat_user_tables.n_live_tup`(통계 수집기 누적, DML 직후 근사 반영), ③ `EXPLAIN (FORMAT JSON)`의 `Plan Rows`(WHERE 조건 카운트도 스캔 없이). `reltuples = -1`(14+)은 미분석 테이블이니 0으로 읽지 않고, 파티션 부모는 비어 있어 자식을 합산한다. 오차 상한은 `autovacuum_analyze_scale_factor`(기본 10%) — 행 수 임계값 알람은 PG·MySQL에 ±10% 허용폭을 둔다. 정확값이 필요하면 결국 `COUNT(*)`이며 index-only scan·Reader 실행으로 부하를 낮춘다.^[inferred]
 
 **SQL Server**
 
