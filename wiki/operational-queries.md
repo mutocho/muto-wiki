@@ -169,6 +169,46 @@ LIMIT 20;
 > 버전 주의: **PG13에서 `total_time` → `total_exec_time`, `mean_time` → `mean_exec_time`으로 개명**됐다. PG12 이하는 옛 컬럼명을 쓴다.
 > 누적 통계이므로 마지막 리셋 시점을 함께 봐야 의미가 있다: `SELECT stats_reset FROM pg_stat_statements_info;` (PG14+)
 
+**PostgreSQL 17+ 확장판** — 전체 대비 비중·호출률·플랜 안정성까지 한 화면에:
+
+```sql
+WITH s AS (
+  SELECT *,
+         extract(epoch FROM now() - stats_since) AS age_sec
+  FROM pg_stat_statements
+  WHERE query !~ '^(FETCH|DECLARE|CLOSE|BEGIN|COMMIT|SET|SHOW|DEALLOCATE)'
+),
+tot AS (SELECT sum(total_exec_time) AS t FROM s)
+SELECT queryid,
+       d.datname,
+       calls,
+       round(calls / NULLIF(age_sec, 0) * 60, 1)           AS calls_per_min,
+       round(total_exec_time::numeric / 1000, 1)           AS total_sec,
+       round((100 * total_exec_time / tot.t)::numeric, 1)  AS pct_total,
+       round(mean_exec_time::numeric, 2)                   AS mean_ms,
+       round(max_exec_time::numeric, 1)                    AS max_ms,
+       round(stddev_exec_time::numeric, 1)                 AS stddev_ms,
+       round(rows::numeric / NULLIF(calls, 0), 1)          AS rows_per_call,
+       round(100.0 * shared_blks_hit
+             / NULLIF(shared_blks_hit + shared_blks_read, 0), 1) AS hit_pct,
+       pg_size_pretty((shared_blks_read * 8192)::bigint)   AS read_from_disk,
+       pg_size_pretty(temp_blks_written * 8192)            AS temp_written,
+       pg_size_pretty(wal_bytes)                           AS wal,
+       to_char(stats_since,        'MM-DD HH24:MI')        AS since,
+       to_char(minmax_stats_since, 'MM-DD HH24:MI')        AS minmax_since,
+       left(regexp_replace(query, '\s+', ' ', 'g'), 120)   AS query
+FROM s
+JOIN pg_database d ON d.oid = s.dbid
+CROSS JOIN tot
+ORDER BY total_exec_time DESC
+LIMIT 30;
+```
+
+- 읽는 법: `pct_total` 상위가 튜닝 우선순위. `stddev_ms > mean_ms`면 플랜 불안정(파라미터 스니핑·통계 노후). `temp_written`이 있으면 `work_mem` 부족. `rows_per_call`은 큰데 `calls`도 많으면 N+1 또는 페이지네이션 미적용.^[inferred]
+- **`stats_since`(17+)**: 그 항목의 누적이 시작된 시각(생성 또는 리셋). 항목마다 다르므로 `total_exec_time`을 그대로 비교하지 말고 이 값으로 나눠 호출률·시간률로 정규화한다. **`minmax_stats_since`(17+)**: `min/max_*_time`만 마지막으로 리셋된 시각 — `pg_stat_statements_reset(0, 0, 0, minmax_only := true)`로 누적은 두고 피크만 초기화할 수 있어, 배포 직전에 리셋하면 배포 후 `max_exec_time`이 그 구간의 피크만 보여준다.
+- **`FETCH 50 IN "query-cursor_7724"` 같은 항목**은 클라이언트가 서버측 커서(`DECLARE ... CURSOR FOR <SQL>` → `FETCH n` 반복 → `CLOSE`)를 쓴 흔적이다. 실행 시간은 `FETCH`에, SQL 텍스트는 `DECLARE`에 갈라져 쌓여 **진짜 쿼리가 싸 보이고**, 커서명에 번호가 붙어 항목이 무한 증식해 `pg_stat_statements.max`(기본 5000)를 채우고 실제 쿼리 항목을 축출한다. 대응은 `pg_stat_statements.track_utility = off` 또는 위처럼 조회에서 제외. 어느 클라이언트인지는 `pg_stat_activity.application_name`으로 확인하고 fetchSize·커서 설정을 검토한다.
+- PG16 이하: `stats_since`·`minmax_stats_since` 두 줄을 빼고 `calls_per_min`은 `pg_stat_statements_info.stats_reset` 기준으로 바꾼다. PG12 이하는 `total_time`·`wal_bytes` 없음.
+
 **MySQL**
 
 ```sql

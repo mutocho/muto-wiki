@@ -18,6 +18,7 @@ notion_synced: null
 
 # Wiki Log
 
+- [2026-09-23T10:59:44+09:00] QUERY query="pg_stat_statements stats_since/minmax_stats_since 의미, FETCH IN cursor 항목, 조회 쿼리" result_pages=1 note="operational-queries 3절에 PG17 확장판 쿼리·커서 오염 주석 추가"
 - [2026-09-23T10:57:10+09:00] QUERY query="PG 테이블 카운트 부하 없이 세기 (sp_spaceused 대응)" result_pages=1 note="operational-queries 5절에 3사 행 수 신뢰도·PG 추정 수단 3종 추가"
 - [2026-09-22T10:45:40+09:00] INGEST source="대화 붙여넣기 (PG DB 오너 변경 메모)" pages_created=0 pages_updated=2 note="postgresql-object-operations 소유권 일괄 이관 절 추가(GRANT 순서·REASSIGN 범위 교정), db-permission-queries 교차참조"
 - [2026-09-22T10:22:23+09:00] INGEST source="대화 붙여넣기 (CloudWatch Logs Insights Access denied 쿼리)" pages_created=0 pages_updated=2 note="operational-queries 12절 추가, db-permission-queries 교차참조"
